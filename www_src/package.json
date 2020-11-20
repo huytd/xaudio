@@ -17,7 +17,8 @@
     "typescript": "^4.0.5"
   },
   "scripts": {
-    "dev": "parcel ./index.html --dist-dir ../www"
+    "dev": "parcel ./index.html --dist-dir ../www",
+    "build": "parcel build ./index.html --dist-dir ../www"
   },
   "devDependencies": {
     "@parcel/transformer-svg-react": "^2.0.0-nightly.1739",
