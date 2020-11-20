@@ -6,7 +6,9 @@ import classnames from 'classnames';
 import './styles.css';
 
 // TODO: BUGS:
-// - Click on a song should stop all previous songs
+// - Click on a song should stop all previous songs. Only 1 song play at a time.
+// - Click on first song does not play
+// - Delete a song should not stop current song
 
 const spinnerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
 const plusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -16,6 +18,7 @@ const pauseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" heigh
 const prevIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-back"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>;
 const nextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-forward"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>;
 const deleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+const searchIcon = () => <svg width="20" height="20" fill="none"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>;
 
 const templateState = {
   "songs": [
@@ -378,8 +381,7 @@ const durationDisplay = counter => {
   const hrs = ~~(remain / 3600);
   const min = ~~((remain - hrs * 3600) / 60);
   const sec = ~~(remain % 60);
-  return `${days > 0 ? days + ' days' : ''} ${hrs > 0 ? pad(hrs) + ':' : ''
-    }${pad(min)}:${pad(sec)}`;
+  return `${hrs > 0 ? pad(hrs) + ':' : ''}${pad(min)}:${pad(sec)}`;
 };
 
 const API = {
@@ -415,19 +417,20 @@ const SearchEntries = ({ items }) => {
         key={i}
         onClick={() => entryClickHandler(item)}
         className={classnames(
-          "group p-3 border-b flex flex-row cursor-pointer hover:bg-gray-100",
+          "group p-3 border-b border-gray-700 flex flex-row cursor-pointer hover:bg-gray-800",
           { "opacity-25 pointer-events-none": disabled }
         )}
       >
         <div className={classnames(
           "w-8 h-8 mr-2 flex items-center justify-center flex-shrink-0",
-          { "group-hover:text-green-500": !disabled }
+          { "text-white group-hover:text-green-500": !disabled },
+          { "text-gray-600": disabled }
         )}>
           {disabled ? checkIcon() : plusIcon()}
         </div>
-        <div className="flex-1">
-          <div className="font-medium">{item.title}</div>
-          <div className="flex flex-row text-sm text-gray-400">
+        <div className="flex-1 items-center">
+          <div className="font-medium text-white">{item.title}</div>
+          <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
             <div className="flex-1 text-right font-medium">{durationDisplay(item.duration)}</div>
           </div>
@@ -455,20 +458,27 @@ const SearchArea = () => {
   };
 
   return (
-    <div id="search-area" className="col-span-2 border-l">
-      <input
-        ref={searchInputRef}
-        type="text"
-        className="w-full p-3 border-b outline-none focus:ring-2 bg-gray-50"
-        placeholder="Search by song title or artist..."
-        onKeyPress={keyPressHandler}
-      />
+    <div id="search-area" className="w-3/12 border-l border-gray-700 bg-gray-800 opacity-80 flex flex-col shadow-lg">
+      <div
+        className="px-4 py-2 items-center bg-gray-600 rounded-full m-3 flex-shrink-0 text-white flex flex-row"
+      >
+        <div className="flex-shrink-0 mr-3">
+          {searchIcon()}
+        </div>
+        <input
+          className="flex-1 outline-none bg-gray-600 text-white"
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search by song title or artist..."
+          onKeyPress={keyPressHandler}
+        />
+      </div>
       {loading ? (
-        <div className="animate-spin my-5 mx-auto h-5 w-5 text-black">
+        <div className="animate-spin my-5 mx-auto h-5 w-5 text-white">
           {spinnerIcon()}
         </div>
       ) : (
-        <ul>
+        <ul className="flex-1">
           <SearchEntries items={searchResult} />
         </ul>
       )}
@@ -494,21 +504,22 @@ const MediaPlaylist = () => {
   };
 
   return (
-    <ul>
+    <div className="overflow-y-scroll absolute top-0 left-0 right-0 bottom-0" style={{ right: -17 }}>
       {state.songs.map((song, i) => {
         const isCurrent = state.player?.currentSongIndex === i;
         return (
-          <li
+          <div
             key={i}
             className={classnames(
-              "group grid grid-cols-10 gap-2 border-b cursor-pointer",
+              "group grid grid-cols-10 border-b border-gray-800 cursor-pointer hover:bg-gray-800",
+              "items-center",
               { "text-green-500": isCurrent },
-              { "hover:bg-gray-50": !isCurrent }
+              { "text-gray-300": !isCurrent }
             )}
             onClick={() => playClickHandler(i)}
           >
-            <div className="p-2 col-span-6 font-medium flex flex-row">
-              <div className="flex-shrink-0 mr-2 w-6 h-6 text-center items-center justify-center bg-gray-200">{i}</div>
+            <div className="p-2 col-span-6 font-medium flex flex-row items-center">
+              <div className="flex-shrink-0 mr-2 w-8 h-6 text-center items-center justify-center text-gray-700">{i}</div>
               <div className="flex-1">{song.title}</div>
             </div>
             <div className="p-2 col-span-2">{song.uploader}</div>
@@ -516,17 +527,17 @@ const MediaPlaylist = () => {
             <div className="p-2 col-span-1">
               <button
                 className={classnames(
-                  "w-8 h-8 opacity-10 group-hover:opacity-100 flex mx-auto items-center justify-center text-red-500",
+                  "w-8 h-8 flex float-right mx-5 items-center justify-center text-white opacity-10 hover:opacity-100 hover:text-red-500",
                 )}
                 onClick={() => deleteClickHandler(song)}
               >
                 {deleteIcon()}
               </button>
             </div>
-          </li>
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 };
 
@@ -625,40 +636,40 @@ const AudioPlayer = () => {
   }, [state.player]);
 
   return (
-    <div className="p-3 flex-1 flex flex-row items-center border-t">
+    <div className="p-5 flex-1 flex flex-row items-center bg-gray-800 border-t border-gray-700">
       <button
-        className="w-8 h-8 rounded-full mr-2 flex items-center justify-center border-gray-500 border-2 hover:bg-gray-100"
+        className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={prevSongHandler}
       >
         {prevIcon()}
       </button>
       <button
-        className="w-12 h-12 rounded-full mr-2 flex items-center justify-center border-gray-500 border-2 hover:bg-gray-100"
+        className="w-12 h-12 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={playPauseToggle}
       >
         {playing ? pauseIcon() : playIcon()}
       </button>
       <button
-        className="w-8 h-8 rounded-full mr-2 flex items-center justify-center border-gray-500 border-2 hover:bg-gray-100"
+        className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={nextSongHandler}
       >
         {nextIcon()}
       </button>
-      <div className="flex-1 h-2 rounded-lg border-2 border-gray-500">
-        <div className="h-full bg-gray-600" style={{width: `${songProgress}%`}}></div>
+      <div className="flex-1 h-2 rounded-lg border border-gray-500 mx-5">
+        <div className="h-full bg-gray-300" style={{width: `${songProgress}%`}}></div>
       </div>
-      <div className="w-2/12 text-center text-sm text-gray-600 font-mono">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
+      <div className="px-3 text-center text-sm text-gray-500 font-mono">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
     </div>
   );
 };
 
 const MediaPlayerArea = () => {
   return (
-    <div id="music-player" className="max-h-screen col-span-3 flex flex-col">
-      <div id="playlist" className="flex-1 overflow-auto">
+    <div id="music-player" className="max-h-screen flex-1 flex flex-col">
+      <div id="playlist" className="flex-1 overflow-hidden relative">
         <MediaPlaylist/>
       </div>
-      <div id="player-control" className="h-16 flex">
+      <div id="player-control" className="h-18 flex shadow-lg">
         <AudioPlayer/>
       </div>
     </div>
@@ -668,12 +679,18 @@ const MediaPlayerArea = () => {
 const App = () => {
   return (
     <MediaPlayerStateProvider>
-      <div id="main-container" className="w-screen h-screen grid grid-cols-5 gird-rows-1 gap-1">
-        <MediaPlayerArea />
+      <div
+        className="w-screen h-screen flex flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+      >
+        <div
+          className="flex-1 h-screen flex flex-col"
+        >
+          <MediaPlayerArea />
+        </div>
         <SearchArea />
       </div>
     </MediaPlayerStateProvider>
   );
 };
 
-render(<App/>, document.querySelector("#root"));
+render(<App/>, document.querySelector("#app"));
