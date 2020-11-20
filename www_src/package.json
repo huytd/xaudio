@@ -1,0 +1,27 @@
+{
+  "name": "www_src",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@parcel/transformer-js": "^2.0.0-alpha.3",
+    "@types/react": "^16.9.56",
+    "@types/react-dom": "^16.9.9",
+    "axios": "^0.21.0",
+    "classnames": "^2.2.6",
+    "parcel": "^2.0.0-nightly.447",
+    "postcss": "^8.1.7",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "tailwindcss": "^2.0.1",
+    "typescript": "^4.0.5"
+  },
+  "scripts": {
+    "dev": "parcel ./index.html --dist-dir ../www"
+  },
+  "devDependencies": {
+    "@parcel/transformer-svg-react": "^2.0.0-nightly.1739",
+    "@parcel/transformer-svgo": "^2.0.0-nightly.1739",
+    "sass": "^1.29.0"
+  }
+}
