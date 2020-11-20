@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "outDir": "../www",
+        "sourceMap": true,
+        "strict": false,
+        "module": "es6",
+        "moduleResolution": "node",
+        "target": "es5",
+        "allowJs": true,
+        "jsx": "react",
+    },
+    "include": [
+        "**/*"
+    ]
+}

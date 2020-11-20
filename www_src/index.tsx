@@ -3,7 +3,10 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import axios from 'axios';
 import classnames from 'classnames';
-import './styles.scss';
+import './styles.css';
+
+// TODO: BUGS:
+// - Click on a song should stop all previous songs
 
 const spinnerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
 const plusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -14,14 +17,275 @@ const prevIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height
 const nextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-forward"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>;
 const deleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
-const savedState = window.localStorage.getItem('tubemusic-songs');
-const initialMediaPlayerState = savedState ? JSON.parse(savedState) : {
-  songs: [],
-  player: {
-    currentSongIndex: -1,
-    playing: false
+const templateState = {
+  "songs": [
+    {
+      "duration": 233,
+      "id": "CulBRA4HFgk",
+      "title": "Đỉnh của đỉnh - Rhymastic, JustaTee, Wowy, Karik, Binz, Suboi lần đầu kết hợp | Theme Song RAP VIỆT",
+      "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
+    },
+    {
+      "duration": 624,
+      "id": "4ahl6J3zhWA",
+      "title": "Karik, G.Ducky, Ricky Star tạo một cuộc địa chấn bằng bản rap Ala Ela | RAP VIỆT [Live Stage]",
+      "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
+    },
+    {
+      "duration": 386,
+      "id": "tAGnKpE4NCI",
+      "title": "Metallica: Nothing Else Matters (Official Music Video)",
+      "uploader": "Metallica"
+    },
+    {
+      "duration": 331,
+      "id": "CD-E-LDc384",
+      "title": "Metallica: Enter Sandman (Official Music Video)",
+      "uploader": "Metallica"
+    },
+    {
+      "duration": 384,
+      "id": "Ckom3gf57Yw",
+      "title": "Metallica - The Unforgiven (Official Music Video)",
+      "uploader": "Warner Records Vault"
+    },
+    {
+      "duration": 465,
+      "id": "WM8bTdBs-cw",
+      "title": "Metallica: One (Official Music Video)",
+      "uploader": "Metallica"
+    },
+    {
+      "duration": 279,
+      "id": "RDN4awrpPQQ",
+      "title": "Metallica: The Memory Remains (Official Music Video)",
+      "uploader": "Metallica"
+    },
+    {
+      "duration": 392,
+      "id": "JFAcOnhcpGA",
+      "title": "Metallica: Atlas, Rise! (Official Music Video)",
+      "uploader": "Metallica"
+    },
+    {
+      "duration": 297,
+      "id": "KKc_RMln5UY",
+      "title": "Đen - Lối Nhỏ ft. Phương Anh Đào (M/V)",
+      "uploader": "Đen Vâu Official"
+    },
+    {
+      "duration": 274,
+      "id": "ddaEtFOsFeM",
+      "title": "Đen ft. MIN - Bài Này Chill Phết (M/V)",
+      "uploader": "Đen Vâu Official"
+    },
+    {
+      "duration": 241,
+      "id": "5e7e_KZINA4",
+      "title": "Đen - Đưa Nhau Đi Trốn ft. Linh Cáo (Prod. by Suicidal illness) [M/V]",
+      "uploader": "Đen Vâu Official"
+    },
+    {
+      "duration": 223,
+      "id": "iQBYrTjtBOE",
+      "title": "Đen - Lộn Xộn ll",
+      "uploader": "Đen Vâu Official"
+    },
+    {
+      "duration": 236,
+      "id": "kAydgevIafg",
+      "title": "Lộn Xộn lyric- Đen",
+      "uploader": "cái gì cũng có"
+    },
+    {
+      "duration": 370,
+      "id": "Id76JABvGs4",
+      "title": "Nah - Bất Động (Featuring MAC, Lynk Lee, Binz and CleverStar)",
+      "uploader": "deadnah"
+    },
+    {
+      "duration": 151,
+      "id": "UEqxDuK7FrI",
+      "title": "Bụi Đường - JustaTee ft Mr A & Mr T",
+      "uploader": "VCLproduction"
+    },
+    {
+      "duration": 259,
+      "id": "Y9NpOCWcz8E",
+      "title": "[ VIDEO LYRICS ] Tuyết yêu thương - Young Uno",
+      "uploader": "Tuấn Vũ"
+    },
+    {
+      "duration": 224,
+      "id": "jgZkrA8E5do",
+      "title": "TOULIVER x BINZ - \"BIGCITYBOI\" (Official Music Video)",
+      "uploader": "Binz Da Poet"
+    },
+    {
+      "duration": 284,
+      "id": "XdK-PdEdkaU",
+      "title": "[Official MV] Xin Anh Đừng - Emily ft. Lil' Knight & JustaTee",
+      "uploader": "JustaTeeMusic"
+    },
+    {
+      "duration": 290,
+      "id": "SFfBV-LBdC4",
+      "title": "NGỌN NẾN TRƯỚC GIÓ - EMILY ft LK,JUSTATEE,ANDREE",
+      "uploader": "BIGDADDY x EMILY"
+    },
+    {
+      "duration": 272,
+      "id": "4RgCllKvJuc",
+      "title": "Bức Tường - Những Chuyến Đi Dài (Official Music Video)",
+      "uploader": "BAN NHẠC BỨC TƯỜNG"
+    },
+    {
+      "duration": 5384,
+      "id": "8ewBoV-8oLA",
+      "title": "Đất Việt Những Ca Khúc Hay Nhất Của Bức Tường 2015",
+      "uploader": "Ayala Ashley"
+    },
+    {
+      "duration": 2706,
+      "id": "au7mEGplIUo",
+      "title": "Album - Tâm hồn của đá - Bức tường",
+      "uploader": "MrHienNq"
+    },
+    {
+      "duration": 305,
+      "id": "M8687KWCIjg",
+      "title": "Bức Tường - Ngày khác",
+      "uploader": "ndtung90"
+    },
+    {
+      "duration": 244,
+      "id": "ONfVqtNCUQE",
+      "title": "01 - Bay 2 - Microwave [Album 10]",
+      "uploader": "ROCK STORM"
+    },
+    {
+      "duration": 315,
+      "id": "nhv0G1vFLlI",
+      "title": "08 - Nhớ - Microwave [Album 10]",
+      "uploader": "ROCK STORM"
+    },
+    {
+      "duration": 229,
+      "id": "nDtOoosgmWk",
+      "title": "04 - Say - Microwave [Album 10]",
+      "uploader": "ROCK STORM"
+    },
+    {
+      "duration": 246,
+      "id": "DaLEzJeQACU",
+      "title": "03 - Phai - Microwave [Album 10]",
+      "uploader": "ROCK STORM"
+    },
+    {
+      "duration": 309,
+      "id": "peDZ6THxUnU",
+      "title": "06 - Quên - Microwave [Album 10]",
+      "uploader": "ROCK STORM"
+    },
+    {
+      "duration": 239,
+      "id": "2kgET0iolaM",
+      "title": "05 - Đừng - Microwave [Album 10]",
+      "uploader": "ROCK STORM"
+    },
+    {
+      "duration": 347,
+      "id": "FrR_Ugq_hRk",
+      "title": "Rosewood - Âm thanh thời gian - official MV",
+      "uploader": "Ha Vu"
+    },
+    {
+      "duration": 417,
+      "id": "KloZvQvSYBM",
+      "title": "Một Điều Là Mãi Mãi - Rosewood",
+      "uploader": "quang nguyen"
+    },
+    {
+      "duration": 371,
+      "id": "QIfBYeQjTks",
+      "title": "CHA - MTV, Karik, Võ Trọng Phúc, Ngô Duy Khiêm, Nguyễn Quân, The Zoo [ MTVband ]",
+      "uploader": "MTV Band"
+    },
+    {
+      "duration": 203,
+      "id": "lYUYLqkNqDk",
+      "title": "Hydra - Người cha câm - Team Karik | RAP VIỆT [MV Lyrics]",
+      "uploader": "Vie Channel - HTV2 [ RAP VIỆT Official ]"
+    },
+    {
+      "duration": 262,
+      "id": "Mt8VnhbbIVc",
+      "title": "YC - Tượng (Official Audio)",
+      "uploader": "Rhymastic Official"
+    },
+    {
+      "duration": 306,
+      "id": "R43xOUlRHWc",
+      "title": "Tạ Quang Thắng - Vội Vàng (Official Music Video)",
+      "uploader": "Tạ Quang Thắng"
+    },
+    {
+      "duration": 330,
+      "id": "vXOn2pfhCbU",
+      "title": "Tạ Quang Thắng - Đâu Phải Là Mơ (Official Music Video)",
+      "uploader": "Tạ Quang Thắng"
+    },
+    {
+      "duration": 397,
+      "id": "F668R2cwesk",
+      "title": "Tạ Quang Thắng - Duyên (Musical Short Film)",
+      "uploader": "Tạ Quang Thắng"
+    },
+    {
+      "duration": 320,
+      "id": "MsuzMwWGBrY",
+      "title": "Lá Cờ - Tạ Quang Thắng | Điều Nhỏ Xíu Xiu MV Lyrics",
+      "uploader": "Điều Nhỏ Xíu Xiu"
+    },
+    {
+      "duration": 387,
+      "id": "1nB13jFuc2s",
+      "title": "Tạ Quang Thắng - Viết Tình Ca (Official Video)",
+      "uploader": "Tạ Quang Thắng"
+    },
+    {
+      "duration": 274,
+      "id": "AdfSLq7XNoI",
+      "title": "MIN from ST.319 - TÌM (LOST) (ft. MR.A) M/V",
+      "uploader": "ST.319 Entertainment"
+    },
+    {
+      "duration": 294,
+      "id": "0R8IbpKXavM",
+      "title": "MIN - ‘TRÊN TÌNH BẠN DƯỚI TÌNH YÊU’ OFFICIAL MUSIC VIDEO",
+      "uploader": "MIN OFFICIAL"
+    },
+    {
+      "duration": 285,
+      "id": "qGb7H6aN32I",
+      "title": "MIN from ST.319 - Y.Ê.U (Acoustic Ver.) M/V",
+      "uploader": "ST.319 Entertainment"
+    },
+    {
+      "duration": 242,
+      "id": "EWz4fITO5qg",
+      "title": "MIN x ĐEN x JUSTATEE - VÌ YÊU CỨ ĐÂM ĐẦU (VYCĐĐ) | OFFICIAL MUSIC VIDEO (민)",
+      "uploader": "MIN OFFICIAL"
+    }
+  ],
+  "player": {
+    "currentSongIndex": -1
   }
 };
+
+const savedState = window.localStorage.getItem('tubemusic-songs');
+const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
+
 const MediaPlayerContext = React.createContext({
   state: initialMediaPlayerState,
   dispatch: null
@@ -43,16 +307,14 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
-            currentSongIndex: action.value,
-            playing: true
+            currentSongIndex: action.value || state.player.currentSongIndex,
           }
         };
-      case 'PAUSE_SONG':
+      case 'STOP_SONG':
         return {
           ...state,
           player: {
-            ...state.player,
-            playing: false
+            currentSongIndex: -1
           }
         };
       case 'RANDOM_SONG':
@@ -61,7 +323,6 @@ const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             currentSongIndex: randomIndex,
-            playing: true
           }
         };
       case 'NEXT_SONG':
@@ -75,7 +336,6 @@ const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             currentSongIndex: idx,
-            playing: true
           }
         };
       case 'PREV_SONG':
@@ -89,7 +349,6 @@ const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             currentSongIndex: pidx,
-            playing: true
           }
         };
       default:
@@ -103,7 +362,6 @@ const MediaPlayerStateProvider = ({ children }) => {
       ...state,
       player: {
         currentSongIndex: -1,
-        playing: false
       }
     };
     window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
@@ -138,10 +396,10 @@ const API = {
 const SearchEntries = ({ items }) => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
 
-  const entryClickHandler = (item) => {
+  const entryClickHandler = ({ title, id, uploader, duration }) => {
     dispatch({
       type: 'ADD_SONG',
-      value: item
+      value: { title, id, uploader, duration }
     });
   };
 
@@ -247,7 +505,7 @@ const MediaPlaylist = () => {
               { "text-green-500": isCurrent },
               { "hover:bg-gray-50": !isCurrent }
             )}
-            onDoubleClick={() => playClickHandler(i)}
+            onClick={() => playClickHandler(i)}
           >
             <div className="p-2 col-span-6 font-medium flex flex-row">
               <div className="flex-shrink-0 mr-2 w-6 h-6 text-center items-center justify-center bg-gray-200">{i}</div>
@@ -275,6 +533,7 @@ const MediaPlaylist = () => {
 const AudioPlayer = () => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
   const playerRef = React.useRef<HTMLAudioElement>();
+  const [playing, setPlaying] = React.useState(false);
   const [songProgress, setSongProgress] = React.useState(0);
   const [duration, setDuration] = React.useState({
     current: 0,
@@ -316,16 +575,12 @@ const AudioPlayer = () => {
   const playPauseToggle = () => {
     const player = playerRef.current;
     if (player) {
-      if (state.player.playing) {
-        dispatch({
-          type: 'PAUSE_SONG'
-        });
+      if (playing) {
         player.pause();
+        setPlaying(false);
       } else {
-        dispatch({
-          type: 'PLAY_SONG'
-        });
         player.play();
+        setPlaying(true);
       }
     }
   };
@@ -343,7 +598,13 @@ const AudioPlayer = () => {
 
           const source = await API.getUrl(song.id);
           playerRef.current = new Audio(source.url);
-          document.title = song.title;
+          document.title = "Loading...";
+
+          playerRef.current.addEventListener('canplay', () => {
+            document.title = song.title;
+            setPlaying(true);
+            playerRef.current.play();
+          });
 
           playerRef.current.addEventListener('timeupdate', (e) => {
             const player = playerRef.current;
@@ -358,8 +619,6 @@ const AudioPlayer = () => {
               nextSongHandler();
             }
           });
-
-          playerRef.current.play();
         }
       }
     })();
@@ -377,7 +636,7 @@ const AudioPlayer = () => {
         className="w-12 h-12 rounded-full mr-2 flex items-center justify-center border-gray-500 border-2 hover:bg-gray-100"
         onClick={playPauseToggle}
       >
-        {state.player?.playing ? pauseIcon() : playIcon()}
+        {playing ? pauseIcon() : playIcon()}
       </button>
       <button
         className="w-8 h-8 rounded-full mr-2 flex items-center justify-center border-gray-500 border-2 hover:bg-gray-100"
