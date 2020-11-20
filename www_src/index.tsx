@@ -1,17 +1,18 @@
+import 'regenerator-runtime/runtime';
 import * as React from 'react';
 import { render } from 'react-dom';
 import axios from 'axios';
 import classnames from 'classnames';
 import './styles.scss';
 
-import spinnerIcon from './images/spinner.svg';
-import plusIcon from './images/plus.svg';
-import checkIcon from './images/check.svg';
-import playIcon from './images/play.svg';
-import pauseIcon from './images/pause.svg';
-import prevIcon from './images/skip-back.svg';
-import nextIcon from './images/skip-forward.svg';
-import deleteIcon from './images/delete.svg';
+const spinnerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
+const plusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+const checkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+const playIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
+const pauseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-pause"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>;
+const prevIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-back"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>;
+const nextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-forward"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>;
+const deleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
 const savedState = window.localStorage.getItem('tubemusic-songs');
 const initialMediaPlayerState = savedState ? JSON.parse(savedState) : {
@@ -331,33 +332,35 @@ const AudioPlayer = () => {
 
   React.useEffect(() => {
     (async () => {
-      console.log("DBG::I GOT THIS SONG PLAYED", state.player);
       if (state.player) {
-        const song = state.songs[state.player.currentSongIndex];
+        const current = state.player.currentSongIndex;
+        if (current !== -1) {
+          const song = state.songs[current];
 
-        if (playerRef.current) {
-          playerRef.current.pause();
-        }
-
-        const source = await API.getUrl(song.id);
-        playerRef.current = new Audio(source.url);
-        document.title = song.title;
-
-        playerRef.current.addEventListener('timeupdate', (e) => {
-          const player = playerRef.current;
-          let percent = ~~(player.currentTime / player.duration * 100);
-          setSongProgress(percent);
-          setDuration({
-            current: player.currentTime,
-            full: player.duration
-          });
-          if (percent >= 100) {
-            document.title = "Tubemusic";
-            nextSongHandler();
+          if (playerRef.current) {
+            playerRef.current.pause();
           }
-        });
 
-        playerRef.current.play();
+          const source = await API.getUrl(song.id);
+          playerRef.current = new Audio(source.url);
+          document.title = song.title;
+
+          playerRef.current.addEventListener('timeupdate', (e) => {
+            const player = playerRef.current;
+            let percent = ~~(player.currentTime / player.duration * 100);
+            setSongProgress(percent);
+            setDuration({
+              current: player.currentTime,
+              full: player.duration
+            });
+            if (percent >= 100) {
+              document.title = "Tubemusic";
+              nextSongHandler();
+            }
+          });
+
+          playerRef.current.play();
+        }
       }
     })();
   }, [state.player]);
