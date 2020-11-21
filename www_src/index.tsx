@@ -5,10 +5,8 @@ import axios from 'axios';
 import classnames from 'classnames';
 import './styles.css';
 
-// TODO: BUGS:
-// - Click on a song should stop all previous songs. Only 1 song play at a time.
-// - Click on first song does not play
-// - Delete a song should not stop current song
+// TODO:
+// - Sort playlist by drag and drop or by name
 
 const spinnerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
 const plusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -310,7 +308,7 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
-            currentSongIndex: action.value || state.player.currentSongIndex,
+            currentSongIndex: action.value
           }
         };
       case 'STOP_SONG':
@@ -478,9 +476,11 @@ const SearchArea = () => {
           {spinnerIcon()}
         </div>
       ) : (
-        <ul className="flex-1">
-          <SearchEntries items={searchResult} />
-        </ul>
+        <div className="flex-1 relative overflow-hidden">
+          <ul className="absolute top-0 left-0 bottom-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
+            <SearchEntries items={searchResult} />
+          </ul>
+        </div>
       )}
     </div >
   );
@@ -516,11 +516,13 @@ const MediaPlaylist = () => {
               { "text-green-500": isCurrent },
               { "text-gray-300": !isCurrent }
             )}
-            onClick={() => playClickHandler(i)}
           >
-            <div className="p-2 col-span-6 font-medium flex flex-row items-center">
-              <div className="flex-shrink-0 mr-2 w-8 h-6 text-center items-center justify-center text-gray-700">{i}</div>
-              <div className="flex-1">{song.title}</div>
+            <div
+              className="p-2 col-span-6 flex flex-row items-center"
+              onClick={() => playClickHandler(i)}
+            >
+              <div className="flex-shrink-0 mr-2 w-8 h-6 text-center items-center justify-center text-gray-700">{i + 1}</div>
+              <div className="flex-1 hover:text-green-200">{song.title}</div>
             </div>
             <div className="p-2 col-span-2">{song.uploader}</div>
             <div className="p-2 col-span-1">{durationDisplay(song.duration)}</div>
@@ -544,6 +546,7 @@ const MediaPlaylist = () => {
 const AudioPlayer = () => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
   const playerRef = React.useRef<HTMLAudioElement>();
+  const [loading, setLoading] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
   const [songProgress, setSongProgress] = React.useState(0);
   const [duration, setDuration] = React.useState({
@@ -573,7 +576,7 @@ const AudioPlayer = () => {
 
   const prevSongHandler = () => {
     dispatch({
-      type: 'NEXT_SONG'
+      type: 'PREV_SONG'
     });
   }
 
@@ -597,21 +600,27 @@ const AudioPlayer = () => {
   };
 
   React.useEffect(() => {
+    playerRef.current = new Audio();
+  }, []);
+
+  React.useEffect(() => {
     (async () => {
       if (state.player) {
         const current = state.player.currentSongIndex;
         if (current !== -1) {
+          setLoading(true);
           const song = state.songs[current];
 
-          if (playerRef.current) {
+          if (playing) {
             playerRef.current.pause();
           }
 
           const source = await API.getUrl(song.id);
-          playerRef.current = new Audio(source.url);
-          document.title = "Loading...";
+          playerRef.current.src = source.url;
+          playerRef.current.load();
 
           playerRef.current.addEventListener('canplay', () => {
+            setLoading(false);
             document.title = song.title;
             setPlaying(true);
             playerRef.current.play();
@@ -636,7 +645,7 @@ const AudioPlayer = () => {
   }, [state.player]);
 
   return (
-    <div className="p-5 flex-1 flex flex-row items-center bg-gray-800 border-t border-gray-700">
+    <div className="p-3 flex-1 flex flex-row items-center bg-gray-800 border-t border-gray-700">
       <button
         className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={prevSongHandler}
@@ -655,9 +664,17 @@ const AudioPlayer = () => {
       >
         {nextIcon()}
       </button>
-      <div className="flex-1 h-2 rounded-lg border border-gray-500 mx-5">
-        <div className="h-full bg-gray-300" style={{width: `${songProgress}%`}}></div>
-      </div>
+      {loading ? (
+        <div className="flex-1 mx-5 text-center text-sm">
+          <div className="animate-spin mx-auto h-5 w-5 text-white">
+            {spinnerIcon()}
+          </div>
+        </div >
+      ) : (
+        <div className="flex-1 h-2 rounded-lg border border-gray-500 mx-5">
+          <div className="h-full bg-gray-300" style={{ width: `${songProgress}%` }}></div>
+        </div >
+      )}
       <div className="px-3 text-center text-sm text-gray-500 font-mono">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
     </div>
   );
@@ -669,7 +686,7 @@ const MediaPlayerArea = () => {
       <div id="playlist" className="flex-1 overflow-hidden relative">
         <MediaPlaylist/>
       </div>
-      <div id="player-control" className="h-18 flex shadow-lg">
+      <div id="player-control" className="h-auto flex shadow-lg">
         <AudioPlayer/>
       </div>
     </div>
