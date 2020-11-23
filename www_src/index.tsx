@@ -328,7 +328,7 @@ const MediaPlayerStateProvider = ({ children }) => {
         };
       case 'NEXT_SONG':
         let idx = state.player.currentSongIndex;
-        if (idx + 1 < state.songs.length - 1) {
+        if (idx + 1 <= state.songs.length - 1) {
           idx += 1;
         } else {
           idx = 0;
@@ -601,6 +601,31 @@ const AudioPlayer = () => {
 
   React.useEffect(() => {
     playerRef.current = new Audio();
+
+    playerRef.current.addEventListener('canplay', () => {
+      setLoading(false);
+      setPlaying(true);
+      playerRef.current.play();
+    });
+
+    let lastPercent = 0;
+    playerRef.current.addEventListener('timeupdate', (e) => {
+      const player = playerRef.current;
+      let percent = player.currentTime / player.duration * 100;
+      setSongProgress(percent);
+      setDuration({
+        current: player.currentTime,
+        full: player.duration
+      });
+      if (~~percent !== lastPercent) {
+        console.log("DBG::LAST PERCENT", lastPercent);
+        if (percent === 100) {
+          document.title = "Tubemusic";
+          nextSongHandler();
+        }
+        lastPercent = ~~percent;
+      }
+    });
   }, []);
 
   React.useEffect(() => {
@@ -610,6 +635,7 @@ const AudioPlayer = () => {
         if (current !== -1) {
           setLoading(true);
           const song = state.songs[current];
+          document.title = song.title;
 
           if (playing) {
             playerRef.current.pause();
@@ -618,27 +644,6 @@ const AudioPlayer = () => {
           const source = await API.getUrl(song.id);
           playerRef.current.src = source.url;
           playerRef.current.load();
-
-          playerRef.current.addEventListener('canplay', () => {
-            setLoading(false);
-            document.title = song.title;
-            setPlaying(true);
-            playerRef.current.play();
-          });
-
-          playerRef.current.addEventListener('timeupdate', (e) => {
-            const player = playerRef.current;
-            let percent = ~~(player.currentTime / player.duration * 100);
-            setSongProgress(percent);
-            setDuration({
-              current: player.currentTime,
-              full: player.duration
-            });
-            if (percent >= 100) {
-              document.title = "Tubemusic";
-              nextSongHandler();
-            }
-          });
         }
       }
     })();
