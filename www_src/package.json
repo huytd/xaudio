@@ -6,7 +6,6 @@
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.5",
-    "@parcel/transformer-js": "^2.0.0-alpha.3",
     "@types/classnames": "^2.2.11",
     "@types/react": "^16.9.56",
     "@types/react-dom": "^16.9.9",
@@ -17,7 +16,6 @@
     "copy-webpack-plugin": "^6.3.2",
     "css-loader": "^5.0.1",
     "file-loader": "^6.2.0",
-    "parcel": "^2.0.0-nightly.447",
     "postcss": "^8.1.7",
     "postcss-loader": "^4.1.0",
     "react": "^17.0.1",
@@ -35,7 +33,6 @@
     "build": "webpack --mode production"
   },
   "devDependencies": {
-    "@parcel/transformer-svg-react": "^2.0.0-nightly.1739",
     "clean-webpack-plugin": "^3.0.0",
     "fork-ts-checker-webpack-plugin": "^6.0.3",
     "html-webpack-plugin": "^4.5.0",

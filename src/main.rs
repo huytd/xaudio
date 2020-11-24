@@ -6,13 +6,12 @@ use actix_files::Files;
 
 #[derive(Deserialize)]
 struct SearchQuery {
-    query: String,
-    limit: usize
+    query: String
 }
 
 #[get("/api/search")]
 async fn search(param: web::Query<SearchQuery>) -> impl Responder {
-    let result = youtube::search_song(&param.query, param.limit).unwrap_or(vec![]);
+    let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
     web::Json(result)
 }
 

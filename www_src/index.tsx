@@ -21,259 +21,216 @@ const searchIcon = () => <svg width="20" height="20" fill="none"><path d="M21 21
 const templateState = {
   "songs": [
     {
-      "duration": 233,
       "id": "CulBRA4HFgk",
       "title": "Đỉnh của đỉnh - Rhymastic, JustaTee, Wowy, Karik, Binz, Suboi lần đầu kết hợp | Theme Song RAP VIỆT",
       "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
     },
     {
-      "duration": 624,
       "id": "4ahl6J3zhWA",
       "title": "Karik, G.Ducky, Ricky Star tạo một cuộc địa chấn bằng bản rap Ala Ela | RAP VIỆT [Live Stage]",
       "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
     },
     {
-      "duration": 386,
       "id": "tAGnKpE4NCI",
       "title": "Metallica: Nothing Else Matters (Official Music Video)",
       "uploader": "Metallica"
     },
     {
-      "duration": 331,
       "id": "CD-E-LDc384",
       "title": "Metallica: Enter Sandman (Official Music Video)",
       "uploader": "Metallica"
     },
     {
-      "duration": 384,
       "id": "Ckom3gf57Yw",
       "title": "Metallica - The Unforgiven (Official Music Video)",
       "uploader": "Warner Records Vault"
     },
     {
-      "duration": 465,
       "id": "WM8bTdBs-cw",
       "title": "Metallica: One (Official Music Video)",
       "uploader": "Metallica"
     },
     {
-      "duration": 279,
       "id": "RDN4awrpPQQ",
       "title": "Metallica: The Memory Remains (Official Music Video)",
       "uploader": "Metallica"
     },
     {
-      "duration": 392,
       "id": "JFAcOnhcpGA",
       "title": "Metallica: Atlas, Rise! (Official Music Video)",
       "uploader": "Metallica"
     },
     {
-      "duration": 297,
       "id": "KKc_RMln5UY",
       "title": "Đen - Lối Nhỏ ft. Phương Anh Đào (M/V)",
       "uploader": "Đen Vâu Official"
     },
     {
-      "duration": 274,
       "id": "ddaEtFOsFeM",
       "title": "Đen ft. MIN - Bài Này Chill Phết (M/V)",
       "uploader": "Đen Vâu Official"
     },
     {
-      "duration": 241,
       "id": "5e7e_KZINA4",
       "title": "Đen - Đưa Nhau Đi Trốn ft. Linh Cáo (Prod. by Suicidal illness) [M/V]",
       "uploader": "Đen Vâu Official"
     },
     {
-      "duration": 223,
       "id": "iQBYrTjtBOE",
       "title": "Đen - Lộn Xộn ll",
       "uploader": "Đen Vâu Official"
     },
     {
-      "duration": 236,
       "id": "kAydgevIafg",
       "title": "Lộn Xộn lyric- Đen",
       "uploader": "cái gì cũng có"
     },
     {
-      "duration": 370,
       "id": "Id76JABvGs4",
       "title": "Nah - Bất Động (Featuring MAC, Lynk Lee, Binz and CleverStar)",
       "uploader": "deadnah"
     },
     {
-      "duration": 151,
       "id": "UEqxDuK7FrI",
       "title": "Bụi Đường - JustaTee ft Mr A & Mr T",
       "uploader": "VCLproduction"
     },
     {
-      "duration": 259,
       "id": "Y9NpOCWcz8E",
       "title": "[ VIDEO LYRICS ] Tuyết yêu thương - Young Uno",
       "uploader": "Tuấn Vũ"
     },
     {
-      "duration": 224,
       "id": "jgZkrA8E5do",
       "title": "TOULIVER x BINZ - \"BIGCITYBOI\" (Official Music Video)",
       "uploader": "Binz Da Poet"
     },
     {
-      "duration": 284,
       "id": "XdK-PdEdkaU",
       "title": "[Official MV] Xin Anh Đừng - Emily ft. Lil' Knight & JustaTee",
       "uploader": "JustaTeeMusic"
     },
     {
-      "duration": 290,
       "id": "SFfBV-LBdC4",
       "title": "NGỌN NẾN TRƯỚC GIÓ - EMILY ft LK,JUSTATEE,ANDREE",
       "uploader": "BIGDADDY x EMILY"
     },
     {
-      "duration": 272,
       "id": "4RgCllKvJuc",
       "title": "Bức Tường - Những Chuyến Đi Dài (Official Music Video)",
       "uploader": "BAN NHẠC BỨC TƯỜNG"
     },
     {
-      "duration": 5384,
       "id": "8ewBoV-8oLA",
       "title": "Đất Việt Những Ca Khúc Hay Nhất Của Bức Tường 2015",
       "uploader": "Ayala Ashley"
     },
     {
-      "duration": 2706,
       "id": "au7mEGplIUo",
       "title": "Album - Tâm hồn của đá - Bức tường",
       "uploader": "MrHienNq"
     },
     {
-      "duration": 305,
       "id": "M8687KWCIjg",
       "title": "Bức Tường - Ngày khác",
       "uploader": "ndtung90"
     },
     {
-      "duration": 244,
       "id": "ONfVqtNCUQE",
       "title": "01 - Bay 2 - Microwave [Album 10]",
       "uploader": "ROCK STORM"
     },
     {
-      "duration": 315,
       "id": "nhv0G1vFLlI",
       "title": "08 - Nhớ - Microwave [Album 10]",
       "uploader": "ROCK STORM"
     },
     {
-      "duration": 229,
       "id": "nDtOoosgmWk",
       "title": "04 - Say - Microwave [Album 10]",
       "uploader": "ROCK STORM"
     },
     {
-      "duration": 246,
       "id": "DaLEzJeQACU",
       "title": "03 - Phai - Microwave [Album 10]",
       "uploader": "ROCK STORM"
     },
     {
-      "duration": 309,
       "id": "peDZ6THxUnU",
       "title": "06 - Quên - Microwave [Album 10]",
       "uploader": "ROCK STORM"
     },
     {
-      "duration": 239,
       "id": "2kgET0iolaM",
       "title": "05 - Đừng - Microwave [Album 10]",
       "uploader": "ROCK STORM"
     },
     {
-      "duration": 347,
       "id": "FrR_Ugq_hRk",
       "title": "Rosewood - Âm thanh thời gian - official MV",
       "uploader": "Ha Vu"
     },
     {
-      "duration": 417,
       "id": "KloZvQvSYBM",
       "title": "Một Điều Là Mãi Mãi - Rosewood",
       "uploader": "quang nguyen"
     },
     {
-      "duration": 371,
       "id": "QIfBYeQjTks",
       "title": "CHA - MTV, Karik, Võ Trọng Phúc, Ngô Duy Khiêm, Nguyễn Quân, The Zoo [ MTVband ]",
       "uploader": "MTV Band"
     },
     {
-      "duration": 203,
       "id": "lYUYLqkNqDk",
       "title": "Hydra - Người cha câm - Team Karik | RAP VIỆT [MV Lyrics]",
       "uploader": "Vie Channel - HTV2 [ RAP VIỆT Official ]"
     },
     {
-      "duration": 262,
       "id": "Mt8VnhbbIVc",
       "title": "YC - Tượng (Official Audio)",
       "uploader": "Rhymastic Official"
     },
     {
-      "duration": 306,
       "id": "R43xOUlRHWc",
       "title": "Tạ Quang Thắng - Vội Vàng (Official Music Video)",
       "uploader": "Tạ Quang Thắng"
     },
     {
-      "duration": 330,
       "id": "vXOn2pfhCbU",
       "title": "Tạ Quang Thắng - Đâu Phải Là Mơ (Official Music Video)",
       "uploader": "Tạ Quang Thắng"
     },
     {
-      "duration": 397,
       "id": "F668R2cwesk",
       "title": "Tạ Quang Thắng - Duyên (Musical Short Film)",
       "uploader": "Tạ Quang Thắng"
     },
     {
-      "duration": 320,
       "id": "MsuzMwWGBrY",
       "title": "Lá Cờ - Tạ Quang Thắng | Điều Nhỏ Xíu Xiu MV Lyrics",
       "uploader": "Điều Nhỏ Xíu Xiu"
     },
     {
-      "duration": 387,
       "id": "1nB13jFuc2s",
       "title": "Tạ Quang Thắng - Viết Tình Ca (Official Video)",
       "uploader": "Tạ Quang Thắng"
     },
     {
-      "duration": 274,
       "id": "AdfSLq7XNoI",
       "title": "MIN from ST.319 - TÌM (LOST) (ft. MR.A) M/V",
       "uploader": "ST.319 Entertainment"
     },
     {
-      "duration": 294,
       "id": "0R8IbpKXavM",
       "title": "MIN - ‘TRÊN TÌNH BẠN DƯỚI TÌNH YÊU’ OFFICIAL MUSIC VIDEO",
       "uploader": "MIN OFFICIAL"
     },
     {
-      "duration": 285,
       "id": "qGb7H6aN32I",
       "title": "MIN from ST.319 - Y.Ê.U (Acoustic Ver.) M/V",
       "uploader": "ST.319 Entertainment"
     },
     {
-      "duration": 242,
       "id": "EWz4fITO5qg",
       "title": "MIN x ĐEN x JUSTATEE - VÌ YÊU CỨ ĐÂM ĐẦU (VYCĐĐ) | OFFICIAL MUSIC VIDEO (민)",
       "uploader": "MIN OFFICIAL"
@@ -396,10 +353,10 @@ const API = {
 const SearchEntries = ({ items }) => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
 
-  const entryClickHandler = ({ title, id, uploader, duration }) => {
+  const entryClickHandler = ({ title, id, uploader }) => {
     dispatch({
       type: 'ADD_SONG',
-      value: { title, id, uploader, duration }
+      value: { title, id, uploader }
     });
   };
 
@@ -430,7 +387,7 @@ const SearchEntries = ({ items }) => {
           <div className="font-medium text-white">{item.title}</div>
           <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
-            <div className="flex-1 text-right font-medium">{durationDisplay(item.duration)}</div>
+            <div className="flex-1 text-right font-medium"></div>
           </div>
         </div>
       </li>
@@ -525,7 +482,7 @@ const MediaPlaylist = () => {
               <div className="flex-1 hover:text-green-200">{song.title}</div>
             </div>
             <div className="p-2 col-span-2">{song.uploader}</div>
-            <div className="p-2 col-span-1">{durationDisplay(song.duration)}</div>
+            <div className="p-2 col-span-1"></div>
             <div className="p-2 col-span-1">
               <button
                 className={classnames(
