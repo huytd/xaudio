@@ -33,6 +33,7 @@
     "build": "webpack --mode production"
   },
   "devDependencies": {
+    "awesome-typescript-loader": "^5.2.1",
     "clean-webpack-plugin": "^3.0.0",
     "fork-ts-checker-webpack-plugin": "^6.0.3",
     "html-loader": "^1.3.2",

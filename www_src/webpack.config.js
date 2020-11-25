@@ -64,7 +64,10 @@ const config = {
       '.jsx',
       '.tsx',
       '.ts'
-    ]
+    ],
+    alias: {
+      "~": path.resolve(__dirname)
+    }
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin(),

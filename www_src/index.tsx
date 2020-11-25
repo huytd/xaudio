@@ -1,10 +1,10 @@
 import 'regenerator-runtime/runtime';
 import * as React from 'react';
 import { render } from 'react-dom';
-import axios from 'axios';
 import classnames from 'classnames';
 
 import { SVG } from './components/svg';
+import { ProgressBar } from './components/progress-bar';
 
 import spinnerIcon from './img/spinner.svg';
 import plusIcon from './img/plus.svg';
@@ -18,6 +18,8 @@ import searchIcon from './img/search.svg';
 
 import './styles.css';
 import templateState from './data/template-playlist.json';
+import { durationDisplay } from './lib/utils';
+import { API } from './lib/api';
 
 const savedState = window.localStorage.getItem('tubemusic-songs');
 const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
@@ -104,28 +106,6 @@ const MediaPlayerStateProvider = ({ children }) => {
   }, [ state ]);
 
   return <MediaPlayerContext.Provider value={{ state, dispatch }}>{children}</MediaPlayerContext.Provider>;
-};
-
-
-const pad = n => (n > 9 ? `${n}` : `0${n}`);
-const durationDisplay = counter => {
-  const days = ~~(counter / 86400);
-  const remain = counter - days * 86400;
-  const hrs = ~~(remain / 3600);
-  const min = ~~((remain - hrs * 3600) / 60);
-  const sec = ~~(remain % 60);
-  return `${hrs > 0 ? pad(hrs) + ':' : ''}${pad(min)}:${pad(sec)}`;
-};
-
-const API = {
-  search: async (query) => {
-    const result = await axios.get(`/api/search?query=${query}&limit=10`);
-    return result?.data;
-  },
-  getUrl: async (song) => {
-    const result = await axios.get(`/api/play?id=${song}`);
-    return result?.data;
-  }
 };
 
 const SearchEntries = ({ items }) => {
@@ -353,7 +333,6 @@ const AudioPlayer = () => {
         full: player.duration
       });
       if (~~percent !== lastPercent) {
-        console.log("DBG::LAST PERCENT", lastPercent);
         if (percent === 100) {
           document.title = "Tubemusic";
           nextSongHandler();
@@ -384,6 +363,15 @@ const AudioPlayer = () => {
     })();
   }, [state.player]);
 
+  const songProgressClickHandler = (percent) => {
+    if (playing) {
+      const player = playerRef.current;
+      const duration = player.duration;
+      const goTo = ~~(duration * percent / 100);
+      player.currentTime = goTo;
+    }
+  };
+
   return (
     <div className="p-3 flex-1 flex flex-row items-center bg-gray-800 border-t border-gray-700">
       <button
@@ -411,9 +399,10 @@ const AudioPlayer = () => {
           </div>
         </div >
       ) : (
-        <div className="flex-1 h-2 rounded-lg border border-gray-500 mx-5">
-          <div className="h-full bg-gray-300" style={{ width: `${songProgress}%` }}></div>
-        </div >
+        <ProgressBar
+          progress={songProgress}
+          onClick={songProgressClickHandler}
+        />
       )}
       <div className="px-3 text-center text-sm text-gray-500 font-mono">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
     </div>
