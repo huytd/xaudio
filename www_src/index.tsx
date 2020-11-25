@@ -3,243 +3,21 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import axios from 'axios';
 import classnames from 'classnames';
+
+import { SVG } from './components/svg';
+
+import spinnerIcon from './img/spinner.svg';
+import plusIcon from './img/plus.svg';
+import checkIcon from './img/check.svg';
+import playIcon from './img/play.svg';
+import pauseIcon from './img/pause.svg';
+import prevIcon from './img/prev.svg';
+import nextIcon from './img/next.svg';
+import deleteIcon from './img/delete.svg';
+import searchIcon from './img/search.svg';
+
 import './styles.css';
-
-// TODO:
-// - Sort playlist by drag and drop or by name
-
-const spinnerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
-const plusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
-const checkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>;
-const playIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
-const pauseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-pause"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>;
-const prevIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-back"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>;
-const nextIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-skip-forward"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>;
-const deleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
-const searchIcon = () => <svg width="20" height="20" fill="none"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>;
-
-const templateState = {
-  "songs": [
-    {
-      "id": "CulBRA4HFgk",
-      "title": "Đỉnh của đỉnh - Rhymastic, JustaTee, Wowy, Karik, Binz, Suboi lần đầu kết hợp | Theme Song RAP VIỆT",
-      "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
-    },
-    {
-      "id": "4ahl6J3zhWA",
-      "title": "Karik, G.Ducky, Ricky Star tạo một cuộc địa chấn bằng bản rap Ala Ela | RAP VIỆT [Live Stage]",
-      "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
-    },
-    {
-      "id": "tAGnKpE4NCI",
-      "title": "Metallica: Nothing Else Matters (Official Music Video)",
-      "uploader": "Metallica"
-    },
-    {
-      "id": "CD-E-LDc384",
-      "title": "Metallica: Enter Sandman (Official Music Video)",
-      "uploader": "Metallica"
-    },
-    {
-      "id": "Ckom3gf57Yw",
-      "title": "Metallica - The Unforgiven (Official Music Video)",
-      "uploader": "Warner Records Vault"
-    },
-    {
-      "id": "WM8bTdBs-cw",
-      "title": "Metallica: One (Official Music Video)",
-      "uploader": "Metallica"
-    },
-    {
-      "id": "RDN4awrpPQQ",
-      "title": "Metallica: The Memory Remains (Official Music Video)",
-      "uploader": "Metallica"
-    },
-    {
-      "id": "JFAcOnhcpGA",
-      "title": "Metallica: Atlas, Rise! (Official Music Video)",
-      "uploader": "Metallica"
-    },
-    {
-      "id": "KKc_RMln5UY",
-      "title": "Đen - Lối Nhỏ ft. Phương Anh Đào (M/V)",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "ddaEtFOsFeM",
-      "title": "Đen ft. MIN - Bài Này Chill Phết (M/V)",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "5e7e_KZINA4",
-      "title": "Đen - Đưa Nhau Đi Trốn ft. Linh Cáo (Prod. by Suicidal illness) [M/V]",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "iQBYrTjtBOE",
-      "title": "Đen - Lộn Xộn ll",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "kAydgevIafg",
-      "title": "Lộn Xộn lyric- Đen",
-      "uploader": "cái gì cũng có"
-    },
-    {
-      "id": "Id76JABvGs4",
-      "title": "Nah - Bất Động (Featuring MAC, Lynk Lee, Binz and CleverStar)",
-      "uploader": "deadnah"
-    },
-    {
-      "id": "UEqxDuK7FrI",
-      "title": "Bụi Đường - JustaTee ft Mr A & Mr T",
-      "uploader": "VCLproduction"
-    },
-    {
-      "id": "Y9NpOCWcz8E",
-      "title": "[ VIDEO LYRICS ] Tuyết yêu thương - Young Uno",
-      "uploader": "Tuấn Vũ"
-    },
-    {
-      "id": "jgZkrA8E5do",
-      "title": "TOULIVER x BINZ - \"BIGCITYBOI\" (Official Music Video)",
-      "uploader": "Binz Da Poet"
-    },
-    {
-      "id": "XdK-PdEdkaU",
-      "title": "[Official MV] Xin Anh Đừng - Emily ft. Lil' Knight & JustaTee",
-      "uploader": "JustaTeeMusic"
-    },
-    {
-      "id": "SFfBV-LBdC4",
-      "title": "NGỌN NẾN TRƯỚC GIÓ - EMILY ft LK,JUSTATEE,ANDREE",
-      "uploader": "BIGDADDY x EMILY"
-    },
-    {
-      "id": "4RgCllKvJuc",
-      "title": "Bức Tường - Những Chuyến Đi Dài (Official Music Video)",
-      "uploader": "BAN NHẠC BỨC TƯỜNG"
-    },
-    {
-      "id": "8ewBoV-8oLA",
-      "title": "Đất Việt Những Ca Khúc Hay Nhất Của Bức Tường 2015",
-      "uploader": "Ayala Ashley"
-    },
-    {
-      "id": "au7mEGplIUo",
-      "title": "Album - Tâm hồn của đá - Bức tường",
-      "uploader": "MrHienNq"
-    },
-    {
-      "id": "M8687KWCIjg",
-      "title": "Bức Tường - Ngày khác",
-      "uploader": "ndtung90"
-    },
-    {
-      "id": "ONfVqtNCUQE",
-      "title": "01 - Bay 2 - Microwave [Album 10]",
-      "uploader": "ROCK STORM"
-    },
-    {
-      "id": "nhv0G1vFLlI",
-      "title": "08 - Nhớ - Microwave [Album 10]",
-      "uploader": "ROCK STORM"
-    },
-    {
-      "id": "nDtOoosgmWk",
-      "title": "04 - Say - Microwave [Album 10]",
-      "uploader": "ROCK STORM"
-    },
-    {
-      "id": "DaLEzJeQACU",
-      "title": "03 - Phai - Microwave [Album 10]",
-      "uploader": "ROCK STORM"
-    },
-    {
-      "id": "peDZ6THxUnU",
-      "title": "06 - Quên - Microwave [Album 10]",
-      "uploader": "ROCK STORM"
-    },
-    {
-      "id": "2kgET0iolaM",
-      "title": "05 - Đừng - Microwave [Album 10]",
-      "uploader": "ROCK STORM"
-    },
-    {
-      "id": "FrR_Ugq_hRk",
-      "title": "Rosewood - Âm thanh thời gian - official MV",
-      "uploader": "Ha Vu"
-    },
-    {
-      "id": "KloZvQvSYBM",
-      "title": "Một Điều Là Mãi Mãi - Rosewood",
-      "uploader": "quang nguyen"
-    },
-    {
-      "id": "QIfBYeQjTks",
-      "title": "CHA - MTV, Karik, Võ Trọng Phúc, Ngô Duy Khiêm, Nguyễn Quân, The Zoo [ MTVband ]",
-      "uploader": "MTV Band"
-    },
-    {
-      "id": "lYUYLqkNqDk",
-      "title": "Hydra - Người cha câm - Team Karik | RAP VIỆT [MV Lyrics]",
-      "uploader": "Vie Channel - HTV2 [ RAP VIỆT Official ]"
-    },
-    {
-      "id": "Mt8VnhbbIVc",
-      "title": "YC - Tượng (Official Audio)",
-      "uploader": "Rhymastic Official"
-    },
-    {
-      "id": "R43xOUlRHWc",
-      "title": "Tạ Quang Thắng - Vội Vàng (Official Music Video)",
-      "uploader": "Tạ Quang Thắng"
-    },
-    {
-      "id": "vXOn2pfhCbU",
-      "title": "Tạ Quang Thắng - Đâu Phải Là Mơ (Official Music Video)",
-      "uploader": "Tạ Quang Thắng"
-    },
-    {
-      "id": "F668R2cwesk",
-      "title": "Tạ Quang Thắng - Duyên (Musical Short Film)",
-      "uploader": "Tạ Quang Thắng"
-    },
-    {
-      "id": "MsuzMwWGBrY",
-      "title": "Lá Cờ - Tạ Quang Thắng | Điều Nhỏ Xíu Xiu MV Lyrics",
-      "uploader": "Điều Nhỏ Xíu Xiu"
-    },
-    {
-      "id": "1nB13jFuc2s",
-      "title": "Tạ Quang Thắng - Viết Tình Ca (Official Video)",
-      "uploader": "Tạ Quang Thắng"
-    },
-    {
-      "id": "AdfSLq7XNoI",
-      "title": "MIN from ST.319 - TÌM (LOST) (ft. MR.A) M/V",
-      "uploader": "ST.319 Entertainment"
-    },
-    {
-      "id": "0R8IbpKXavM",
-      "title": "MIN - ‘TRÊN TÌNH BẠN DƯỚI TÌNH YÊU’ OFFICIAL MUSIC VIDEO",
-      "uploader": "MIN OFFICIAL"
-    },
-    {
-      "id": "qGb7H6aN32I",
-      "title": "MIN from ST.319 - Y.Ê.U (Acoustic Ver.) M/V",
-      "uploader": "ST.319 Entertainment"
-    },
-    {
-      "id": "EWz4fITO5qg",
-      "title": "MIN x ĐEN x JUSTATEE - VÌ YÊU CỨ ĐÂM ĐẦU (VYCĐĐ) | OFFICIAL MUSIC VIDEO (민)",
-      "uploader": "MIN OFFICIAL"
-    }
-  ],
-  "player": {
-    "currentSongIndex": -1
-  }
-};
+import templateState from './data/template-playlist.json';
 
 const savedState = window.localStorage.getItem('tubemusic-songs');
 const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
@@ -381,7 +159,7 @@ const SearchEntries = ({ items }) => {
           { "text-white group-hover:text-green-500": !disabled },
           { "text-gray-600": disabled }
         )}>
-          {disabled ? checkIcon() : plusIcon()}
+          <SVG content={disabled ? checkIcon : plusIcon}/>
         </div>
         <div className="flex-1 items-center">
           <div className="font-medium text-white">{item.title}</div>
@@ -418,7 +196,7 @@ const SearchArea = () => {
         className="px-4 py-2 items-center bg-gray-600 rounded-full m-3 flex-shrink-0 text-white flex flex-row"
       >
         <div className="flex-shrink-0 mr-3">
-          {searchIcon()}
+          <SVG content={searchIcon}/>
         </div>
         <input
           className="flex-1 outline-none bg-gray-600 text-white"
@@ -430,7 +208,7 @@ const SearchArea = () => {
       </div>
       {loading ? (
         <div className="animate-spin my-5 mx-auto h-5 w-5 text-white">
-          {spinnerIcon()}
+          <SVG content={spinnerIcon}/>
         </div>
       ) : (
         <div className="flex-1 relative overflow-hidden">
@@ -490,7 +268,7 @@ const MediaPlaylist = () => {
                 )}
                 onClick={() => deleteClickHandler(song)}
               >
-                {deleteIcon()}
+                <SVG content={deleteIcon}/>
               </button>
             </div>
           </div>
@@ -612,24 +390,24 @@ const AudioPlayer = () => {
         className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={prevSongHandler}
       >
-        {prevIcon()}
+        <SVG content={prevIcon}/>
       </button>
       <button
         className="w-12 h-12 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={playPauseToggle}
       >
-        {playing ? pauseIcon() : playIcon()}
+        <SVG content={playing ? pauseIcon : playIcon}/>
       </button>
       <button
         className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
         onClick={nextSongHandler}
       >
-        {nextIcon()}
+        <SVG content={nextIcon}/>
       </button>
       {loading ? (
         <div className="flex-1 mx-5 text-center text-sm">
           <div className="animate-spin mx-auto h-5 w-5 text-white">
-            {spinnerIcon()}
+            <SVG content={spinnerIcon}/>
           </div>
         </div >
       ) : (

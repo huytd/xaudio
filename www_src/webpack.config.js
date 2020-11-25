@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const path = require('path');
-// const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
@@ -48,21 +47,15 @@ const config = {
           transpileOnly: true
         }
       },
-      // {
-      //   test: /\.svg$/,
-      //   use: 'file-loader'
-      // },
-      // {
-      //   test: /\.png$/,
-      //   use: [
-      //     {
-      //       loader: 'url-loader',
-      //       options: {
-      //         mimetype: 'image/png'
-      //       }
-      //     }
-      //   ]
-      // }
+      {
+        test: /\.svg$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'html-loader',
+          }
+        ]
+      }
     ]
   },
   resolve: {
@@ -75,9 +68,6 @@ const config = {
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
-    // new CopyPlugin({
-    //   patterns: [{ from: 'index.html' }],
-    // }),
     new HtmlWebpackPlugin({
       title: 'Tubemusic',
       template: require('html-webpack-template'),

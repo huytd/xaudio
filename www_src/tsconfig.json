@@ -9,6 +9,10 @@
         "allowJs": true,
         "jsx": "react",
     },
+    "typeRoots": [
+        "./@types",
+        "./node_modules/@types"
+    ],
     "include": [
         "**/*"
     ],
