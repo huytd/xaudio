@@ -57,6 +57,7 @@ pub struct PlaylistEntry {
     pub id: String,
     pub title: String,
     pub uploader: String,
+    pub extractor: String,
 }
 
 #[derive(Default, Debug, Clone, serde_derive::Serialize, serde_derive::Deserialize)]
