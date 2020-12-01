@@ -8,7 +8,7 @@ RUN cargo b --release
 FROM node AS frontend
 ADD ./www_src /app
 WORKDIR /app
-RUN npm install --silent
+RUN npm install
 RUN npm run build
 
 # Build Final
