@@ -45,6 +45,8 @@ async fn import_from_url(param: web::Json<UrlQuery>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let port = std::env::var("PORT").unwrap_or("3123".to_owned()).parse::<u16>().unwrap_or(3366);
+
     HttpServer::new(|| {
         App::new()
             .service(search)
@@ -52,7 +54,7 @@ async fn main() -> std::io::Result<()> {
             .service(import_from_url)
             .service(Files::new("/", "./www").index_file("index.html"))
     })
-    .bind("127.0.0.1:3123")?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
