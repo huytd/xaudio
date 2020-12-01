@@ -12,7 +12,7 @@ RUN npm install --silent
 RUN npm run build
 
 # Build Final
-FROM alpine:3.7
+FROM alpine:3.7 AS xaudio
 RUN apk add youtube-dl
 COPY --from=backend /app/target/release/tubemusic .
 RUN mkdir www
