@@ -141,11 +141,11 @@ const SearchEntries = ({ items }) => {
         )}>
           <SVG content={disabled ? checkIcon : plusIcon}/>
         </div>
-        <div className="flex-1 items-center">
+        <div className="items-center flex-1">
           <div className="font-medium text-white">{item.title}</div>
           <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
-            <div className="flex-1 text-right font-medium"></div>
+            <div className="flex-1 font-medium text-right"></div>
           </div>
         </div>
       </li>
@@ -171,15 +171,15 @@ const SearchArea = () => {
   };
 
   return (
-    <div id="search-area" className="w-3/12 border-l border-gray-700 bg-gray-800 opacity-80 flex flex-col shadow-lg">
+    <div id="search-area" className="flex flex-col w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
       <div
-        className="px-4 py-2 items-center bg-gray-600 rounded-full m-3 flex-shrink-0 text-white flex flex-row"
+        className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full"
       >
         <div className="flex-shrink-0 mr-3">
           <SVG content={searchIcon}/>
         </div>
         <input
-          className="flex-1 outline-none bg-gray-600 text-white"
+          className="flex-1 text-white bg-gray-600 outline-none"
           ref={searchInputRef}
           type="text"
           placeholder="Search by song title or artist..."
@@ -187,12 +187,12 @@ const SearchArea = () => {
         />
       </div>
       {loading ? (
-        <div className="animate-spin my-5 mx-auto h-5 w-5 text-white">
+        <div className="w-5 h-5 mx-auto my-5 text-white animate-spin">
           <SVG content={spinnerIcon}/>
         </div>
       ) : (
-        <div className="flex-1 relative overflow-hidden">
-          <ul className="absolute top-0 left-0 bottom-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
+        <div className="relative flex-1 overflow-hidden">
+          <ul className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
             <SearchEntries items={searchResult} />
           </ul>
         </div>
@@ -219,7 +219,7 @@ const MediaPlaylist = () => {
   };
 
   return (
-    <div className="overflow-y-scroll absolute top-0 left-0 right-0 bottom-0" style={{ right: -17 }}>
+    <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
       {state.songs.map((song, i) => {
         const isCurrent = state.player?.currentSongIndex === i;
         return (
@@ -233,10 +233,10 @@ const MediaPlaylist = () => {
             )}
           >
             <div
-              className="p-2 col-span-6 flex flex-row items-center"
+              className="flex flex-row items-center p-2 col-span-6"
               onClick={() => playClickHandler(i)}
             >
-              <div className="flex-shrink-0 mr-2 w-8 h-6 text-center items-center justify-center text-gray-700">{i + 1}</div>
+              <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">{i + 1}</div>
               <div className="flex-1 hover:text-green-200">{song.title}</div>
             </div>
             <div className="p-2 col-span-2">{song.uploader}</div>
@@ -355,8 +355,7 @@ const AudioPlayer = () => {
             playerRef.current.pause();
           }
 
-          const source = await API.getUrl(song.id);
-          playerRef.current.src = source.url;
+          playerRef.current.src = `/api/stream?id=${song.id}`;
           playerRef.current.load();
         }
       }
@@ -373,28 +372,28 @@ const AudioPlayer = () => {
   };
 
   return (
-    <div className="p-3 flex-1 flex flex-row items-center bg-gray-800 border-t border-gray-700">
+    <div className="flex flex-row items-center flex-1 p-3 bg-gray-800 border-t border-gray-700">
       <button
-        className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
+        className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
         onClick={prevSongHandler}
       >
         <SVG content={prevIcon}/>
       </button>
       <button
-        className="w-12 h-12 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
+        className="flex items-center justify-center w-12 h-12 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
         onClick={playPauseToggle}
       >
         <SVG content={playing ? pauseIcon : playIcon}/>
       </button>
       <button
-        className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500"
+        className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
         onClick={nextSongHandler}
       >
         <SVG content={nextIcon}/>
       </button>
       {loading ? (
-        <div className="flex-1 mx-5 text-center text-sm">
-          <div className="animate-spin mx-auto h-5 w-5 text-white">
+        <div className="flex-1 mx-5 text-sm text-center">
+          <div className="w-5 h-5 mx-auto text-white animate-spin">
             <SVG content={spinnerIcon}/>
           </div>
         </div >
@@ -404,18 +403,18 @@ const AudioPlayer = () => {
           onClick={songProgressClickHandler}
         />
       )}
-      <div className="px-3 text-center text-sm text-gray-500 font-mono">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
+      <div className="px-3 font-mono text-sm text-center text-gray-500">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
     </div>
   );
 };
 
 const MediaPlayerArea = () => {
   return (
-    <div id="music-player" className="max-h-screen flex-1 flex flex-col">
-      <div id="playlist" className="flex-1 overflow-hidden relative">
+    <div id="music-player" className="flex flex-col flex-1 max-h-screen">
+      <div id="playlist" className="relative flex-1 overflow-hidden">
         <MediaPlaylist/>
       </div>
-      <div id="player-control" className="h-auto flex shadow-lg">
+      <div id="player-control" className="flex h-auto shadow-lg">
         <AudioPlayer/>
       </div>
     </div>
@@ -426,10 +425,10 @@ const App = () => {
   return (
     <MediaPlayerStateProvider>
       <div
-        className="w-screen h-screen flex flex-row bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+        className="flex flex-row w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black"
       >
         <div
-          className="flex-1 h-screen flex flex-col"
+          className="flex flex-col flex-1 h-screen"
         >
           <MediaPlayerArea />
         </div>

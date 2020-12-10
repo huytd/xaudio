@@ -84,6 +84,10 @@ pub async fn search_song(input: &str) -> Result<Vec<SearchEntry>, String> {
     Ok(vec![])
 }
 
+pub async fn get_song_stream(url: &str) -> Result<reqwest::Response, String> {
+    reqwest::get(url).await.map_err(stringify_error)
+}
+
 pub fn get_song_url(id: &str) -> Result<String, String> {
     let url = format!("https://youtube.com/watch?v={}", id);
     println!("DBG::FETCHING {}", url);

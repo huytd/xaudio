@@ -1,8 +1,9 @@
 mod youtube;
 use serde::Deserialize;
 use serde_json::json;
-use actix_web::{web, App, Responder, get, post, HttpServer};
+use actix_web::{App, HttpResponse, HttpServer, Responder, ResponseError, client::PayloadError, get, post, web};
 use actix_files::Files;
+use futures::StreamExt;
 
 #[derive(Deserialize)]
 struct SearchQuery {
@@ -37,6 +38,25 @@ async fn play(param: web::Query<PlayQuery>) -> impl Responder {
     }
 }
 
+#[get("/api/stream")]
+async fn stream(param: web::Query<PlayQuery>) -> impl Responder {
+    if let Ok(url) = youtube::get_song_url(&param.id) {
+        let response = youtube::get_song_stream(&url).await;
+        match response {
+            Ok(body) => {
+                let stream = body.bytes_stream().map(|item| item.map_err(|_| HttpResponse::Gone()));
+                return HttpResponse::Ok()
+                    .header("Content-Type", "audio/webm")
+                    .streaming(stream);
+            },
+            Err(_) => {
+                return HttpResponse::NotFound().json(json!({ "success": false }));
+            }
+        }
+    }
+    HttpResponse::NotFound().json(json!({ "success": false }))
+}
+
 #[post("/api/import")]
 async fn import_from_url(param: web::Json<UrlQuery>) -> impl Responder {
     let result = youtube::get_songs_in_playlist(&param.url);
@@ -54,6 +74,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(search)
             .service(play)
+            .service(stream)
             .service(import_from_url)
             .service(Files::new("/", "./www").index_file("index.html"))
     })
