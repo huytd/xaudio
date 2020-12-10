@@ -4,6 +4,8 @@ First, make sure you have `YOUTUBE_API_KEY` environment variable on your machine
 
 If you want to change the HTTP Server port, you can pass the `PORT` environment variable when you run the backend.
 
+You should also have `youtube-dl` installed on your machine.
+
 ## Run with Docker
 
 To run Xaudio with Docker, use the following command:
