@@ -1,7 +1,8 @@
 mod youtube;
+mod billboard;
 use serde::Deserialize;
 use serde_json::json;
-use actix_web::{App, HttpResponse, HttpServer, Responder, ResponseError, client::PayloadError, get, post, web};
+use actix_web::{App, HttpResponse, HttpServer, Responder, get, post, web};
 use actix_files::Files;
 use futures::StreamExt;
 
@@ -66,6 +67,15 @@ async fn import_from_url(param: web::Json<UrlQuery>) -> impl Responder {
     }
 }
 
+#[get("/api/billboard")]
+async fn get_billboard() -> impl Responder {
+    let result = billboard::get_top_songs().await;
+    match result {
+        Ok(songs) => web::Json(json!({ "songs": songs })),
+        Err(_) => web::Json(json!({ "success": false }))
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let port = std::env::var("PORT").unwrap_or("3123".to_owned()).parse::<u16>().unwrap_or(3123);
@@ -75,6 +85,7 @@ async fn main() -> std::io::Result<()> {
             .service(search)
             .service(play)
             .service(stream)
+            .service(get_billboard)
             .service(import_from_url)
             .service(Files::new("/", "./www").index_file("index.html"))
     })
