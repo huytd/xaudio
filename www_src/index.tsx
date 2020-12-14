@@ -340,6 +340,30 @@ const AudioPlayer = () => {
         lastPercent = ~~percent;
       }
     });
+
+    // @ts-ignore
+    navigator.mediaSession.setActionHandler('play', function() {
+      const player = playerRef.current;
+      player.play();
+      setPlaying(true);
+    });
+
+    // @ts-ignore
+    navigator.mediaSession.setActionHandler('pause', function() {
+      const player = playerRef.current;
+      player.pause();
+      setPlaying(false);
+    });
+
+    // @ts-ignore
+    navigator.mediaSession.setActionHandler('previoustrack', function() {
+      prevSongHandler();
+    });
+
+    // @ts-ignore
+    navigator.mediaSession.setActionHandler('nexttrack', function() {
+      nextSongHandler();
+    });
   }, []);
 
   React.useEffect(() => {
@@ -357,6 +381,15 @@ const AudioPlayer = () => {
 
           playerRef.current.src = `/api/stream?id=${song.id}`;
           playerRef.current.load();
+
+          // @ts-ignore
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: song.title,
+            artist: song.uploader,
+            artwork: [
+              { src: `https://img.youtube.com/vi/${song.id}/0.jpg`, sizes: '480x480', type: 'image/png' }
+            ]
+          });
         }
       }
     })();
@@ -366,7 +399,7 @@ const AudioPlayer = () => {
     if (playing) {
       const player = playerRef.current;
       const duration = player.duration;
-      const goTo = ~~(duration * percent / 100);
+      const goTo = parseFloat((duration * percent / 100).toFixed(2));
       player.currentTime = goTo;
     }
   };

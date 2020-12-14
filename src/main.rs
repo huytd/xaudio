@@ -27,18 +27,6 @@ struct UrlQuery {
     url: String
 }
 
-#[get("/api/play")]
-async fn play(param: web::Query<PlayQuery>) -> impl Responder {
-    let result = youtube::get_song_url(&param.id);
-    match result {
-        Ok(song_url) => web::Json(json!({ "url": song_url })),
-        Err(error) => {
-            println!("ERROR: {}", error);
-            return web::Json(json!({ "success": false }));
-        }
-    }
-}
-
 #[get("/api/stream")]
 async fn stream(param: web::Query<PlayQuery>) -> impl Responder {
     if let Ok(url) = youtube::get_song_url(&param.id) {
@@ -83,7 +71,6 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .service(search)
-            .service(play)
             .service(stream)
             .service(get_billboard)
             .service(import_from_url)
