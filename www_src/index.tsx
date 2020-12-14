@@ -1,4 +1,3 @@
-import 'regenerator-runtime/runtime';
 import * as React from 'react';
 import { render } from 'react-dom';
 import classnames from 'classnames';
@@ -22,7 +21,9 @@ import { durationDisplay } from './lib/utils';
 import { API } from './lib/api';
 
 const savedState = window.localStorage.getItem('tubemusic-songs');
-const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
+let initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
+// Sort songs based on listen count
+initialMediaPlayerState.songs.sort((a, b) => (b.listenCount || 0) - (a.listenCount || 0));
 
 const MediaPlayerContext = React.createContext({
   state: initialMediaPlayerState,
@@ -31,6 +32,16 @@ const MediaPlayerContext = React.createContext({
 const MediaPlayerStateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state, action) => {
     switch (action.type) {
+      case 'LISTEN_COUNT':
+      return {
+        ...state,
+        songs: state.songs.map(song => {
+          if (song.id === action.value.id) {
+            song.listenCount = (song.listenCount || 0) + 1;
+          }
+          return song;
+        })
+      }
       case 'ADD_SONG':
         return {
           ...state,
@@ -114,7 +125,7 @@ const SearchEntries = ({ items }) => {
   const entryClickHandler = ({ title, id, uploader }) => {
     dispatch({
       type: 'ADD_SONG',
-      value: { title, id, uploader }
+      value: { title, id, uploader, listenCount: 0 }
     });
   };
 
@@ -261,6 +272,7 @@ const MediaPlaylist = () => {
 const AudioPlayer = () => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
   const playerRef = React.useRef<HTMLAudioElement>();
+  const currentSongRef = React.useRef<any>();
   const [loading, setLoading] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
   const [songProgress, setSongProgress] = React.useState(0);
@@ -321,6 +333,18 @@ const AudioPlayer = () => {
       setLoading(false);
       setPlaying(true);
       playerRef.current.play();
+
+      const currentSong = currentSongRef.current;
+      if (currentSong) {
+        // @ts-ignore
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentSong.title,
+          artist: currentSong.uploader,
+          artwork: [
+            { src: `https://img.youtube.com/vi/${currentSong.id}/0.jpg`, sizes: '480x480', type: 'image/png' }
+          ]
+        });
+      }
     });
 
     let lastPercent = 0;
@@ -373,6 +397,7 @@ const AudioPlayer = () => {
         if (current !== -1) {
           setLoading(true);
           const song = state.songs[current];
+          currentSongRef.current = song;
           document.title = song.title;
 
           if (playing) {
@@ -382,14 +407,10 @@ const AudioPlayer = () => {
           playerRef.current.src = `/api/stream?id=${song.id}`;
           playerRef.current.load();
 
-          // @ts-ignore
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: song.title,
-            artist: song.uploader,
-            artwork: [
-              { src: `https://img.youtube.com/vi/${song.id}/0.jpg`, sizes: '480x480', type: 'image/png' }
-            ]
-          });
+          dispatch({
+            type: 'LISTEN_COUNT',
+            value: song
+          })
         }
       }
     })();
