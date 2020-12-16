@@ -20,6 +20,25 @@ import templateState from './data/template-playlist.json';
 import { durationDisplay } from './lib/utils';
 import { API } from './lib/api';
 
+interface SongState {
+  id: string;
+  title: string;
+  uploader: string;
+  listenCount?: number;
+}
+
+interface MediaPlayerState {
+  songs: SongState[];
+  player: {
+    currentSongId: string;
+  };
+}
+
+interface Action {
+  type: string;
+  value?: any;
+}
+
 const savedState = window.localStorage.getItem('tubemusic-songs');
 let initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
 // Sort songs based on listen count
@@ -30,18 +49,18 @@ const MediaPlayerContext = React.createContext({
   dispatch: null
 });
 const MediaPlayerStateProvider = ({ children }) => {
-  const [state, dispatch] = React.useReducer((state, action) => {
+  const [state, dispatch] = React.useReducer((state: MediaPlayerState, action: Action) => {
     switch (action.type) {
       case 'LISTEN_COUNT':
-      return {
-        ...state,
-        songs: state.songs.map(song => {
-          if (song.id === action.value.id) {
-            song.listenCount = (song.listenCount || 0) + 1;
-          }
-          return song;
-        })
-      }
+        return {
+          ...state,
+          songs: state.songs.map((song) => {
+            if (song.id === action.value.id) {
+              song.listenCount = (song.listenCount || 0) + 1;
+            }
+            return song;
+          })
+        };
       case 'ADD_SONG':
         return {
           ...state,
@@ -50,20 +69,20 @@ const MediaPlayerStateProvider = ({ children }) => {
       case 'REMOVE_SONG':
         return {
           ...state,
-          songs: state.songs.filter(s => s.id !== action.value)
+          songs: state.songs.filter((s) => s.id !== action.value)
         };
       case 'PLAY_SONG':
         return {
           ...state,
           player: {
-            currentSongIndex: action.value
+            currentSongId: action.value
           }
         };
       case 'STOP_SONG':
         return {
           ...state,
           player: {
-            currentSongIndex: -1
+            currentSongId: '0'
           }
         };
       case 'RANDOM_SONG':
@@ -71,11 +90,11 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
-            currentSongIndex: randomIndex,
+            currentSongId: state.songs[randomIndex].id
           }
         };
       case 'NEXT_SONG':
-        let idx = state.player.currentSongIndex;
+        let idx = state.songs.findIndex((song) => song.id === state.player.currentSongId);
         if (idx + 1 <= state.songs.length - 1) {
           idx += 1;
         } else {
@@ -84,11 +103,11 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
-            currentSongIndex: idx,
+            currentSongId: state.songs[idx].id
           }
         };
       case 'PREV_SONG':
-        let pidx = state.player.currentSongIndex;
+        let pidx = state.songs.findIndex((song) => song.id === state.player.currentSongId);
         if (pidx - 1 >= 0) {
           pidx -= 1;
         } else {
@@ -97,7 +116,7 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
-            currentSongIndex: pidx,
+            currentSongId: state.songs[pidx].id
           }
         };
       default:
@@ -110,11 +129,11 @@ const MediaPlayerStateProvider = ({ children }) => {
     const stateToSave = {
       ...state,
       player: {
-        currentSongIndex: -1,
+        currentSongId: '0'
       }
     };
     window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
-  }, [ state ]);
+  }, [state]);
 
   return <MediaPlayerContext.Provider value={{ state, dispatch }}>{children}</MediaPlayerContext.Provider>;
 };
@@ -130,7 +149,7 @@ const SearchEntries = ({ items }) => {
   };
 
   const shouldDisabled = (item) => {
-    const found = state.songs.find(s => s.id === item.id);
+    const found = state.songs.find((s) => s.id === item.id);
     return found !== undefined;
   };
 
@@ -140,17 +159,18 @@ const SearchEntries = ({ items }) => {
       <li
         key={i}
         onClick={() => entryClickHandler(item)}
-        className={classnames(
-          "group p-3 border-b border-gray-700 flex flex-row cursor-pointer hover:bg-gray-800",
-          { "opacity-25 pointer-events-none": disabled }
-        )}
+        className={classnames('group p-3 border-b border-gray-700 flex flex-row cursor-pointer hover:bg-gray-800', {
+          'opacity-25 pointer-events-none': disabled
+        })}
       >
-        <div className={classnames(
-          "w-8 h-8 mr-2 flex items-center justify-center flex-shrink-0",
-          { "text-white group-hover:text-green-500": !disabled },
-          { "text-gray-600": disabled }
-        )}>
-          <SVG content={disabled ? checkIcon : plusIcon}/>
+        <div
+          className={classnames(
+            'w-8 h-8 mr-2 flex items-center justify-center flex-shrink-0',
+            { 'text-white group-hover:text-green-500': !disabled },
+            { 'text-gray-600': disabled }
+          )}
+        >
+          <SVG content={disabled ? checkIcon : plusIcon} />
         </div>
         <div className="items-center flex-1">
           <div className="font-medium text-white">{item.title}</div>
@@ -160,7 +180,7 @@ const SearchEntries = ({ items }) => {
           </div>
         </div>
       </li>
-    )
+    );
   });
 };
 
@@ -183,11 +203,9 @@ const SearchArea = () => {
 
   return (
     <div id="search-area" className="flex flex-col w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
-      <div
-        className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full"
-      >
+      <div className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full">
         <div className="flex-shrink-0 mr-3">
-          <SVG content={searchIcon}/>
+          <SVG content={searchIcon} />
         </div>
         <input
           className="flex-1 text-white bg-gray-600 outline-none"
@@ -199,7 +217,7 @@ const SearchArea = () => {
       </div>
       {loading ? (
         <div className="w-5 h-5 mx-auto my-5 text-white animate-spin">
-          <SVG content={spinnerIcon}/>
+          <SVG content={spinnerIcon} />
         </div>
       ) : (
         <div className="relative flex-1 overflow-hidden">
@@ -208,21 +226,19 @@ const SearchArea = () => {
           </ul>
         </div>
       )}
-    </div >
+    </div>
   );
 };
 
-const MediaPlaylist = () => {
-  const { state, dispatch } = React.useContext(MediaPlayerContext);
-
-  const playClickHandler = (index) => {
+const MediaPlaylist = ({ state, dispatch }) => {
+  const playClickHandler = (id: string) => {
     dispatch({
       type: 'PLAY_SONG',
-      value: index
+      value: id
     });
   };
 
-  const deleteClickHandler = (song) => {
+  const deleteClickHandler = (song: SongState) => {
     dispatch({
       type: 'REMOVE_SONG',
       value: song.id
@@ -232,22 +248,21 @@ const MediaPlaylist = () => {
   return (
     <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
       {state.songs.map((song, i) => {
-        const isCurrent = state.player?.currentSongIndex === i;
+        const isCurrent = state.player?.currentSongId === song.id;
         return (
           <div
             key={i}
             className={classnames(
-              "group grid grid-cols-10 border-b border-gray-800 cursor-pointer hover:bg-gray-800",
-              "items-center",
-              { "text-green-500": isCurrent },
-              { "text-gray-300": !isCurrent }
+              'group grid grid-cols-10 border-b border-gray-800 cursor-pointer hover:bg-gray-800',
+              'items-center',
+              { 'text-green-500': isCurrent },
+              { 'text-gray-300': !isCurrent }
             )}
           >
-            <div
-              className="flex flex-row items-center p-2 col-span-6"
-              onClick={() => playClickHandler(i)}
-            >
-              <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">{i + 1}</div>
+            <div className="flex flex-row items-center p-2 col-span-6" onClick={() => playClickHandler(song.id)}>
+              <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">
+                {i + 1}
+              </div>
               <div className="flex-1 hover:text-green-200">{song.title}</div>
             </div>
             <div className="p-2 col-span-2">{song.uploader}</div>
@@ -255,11 +270,11 @@ const MediaPlaylist = () => {
             <div className="p-2 col-span-1">
               <button
                 className={classnames(
-                  "w-8 h-8 flex float-right mx-5 items-center justify-center text-white opacity-10 hover:opacity-100 hover:text-red-500",
+                  'w-8 h-8 flex float-right mx-5 items-center justify-center text-white opacity-10 hover:opacity-100 hover:text-red-500'
                 )}
                 onClick={() => deleteClickHandler(song)}
               >
-                <SVG content={deleteIcon}/>
+                <SVG content={deleteIcon} />
               </button>
             </div>
           </div>
@@ -269,8 +284,7 @@ const MediaPlaylist = () => {
   );
 };
 
-const AudioPlayer = () => {
-  const { state, dispatch } = React.useContext(MediaPlayerContext);
+const AudioPlayer = ({ dispatch, state }) => {
   const playerRef = React.useRef<HTMLAudioElement>();
   const currentSongRef = React.useRef<any>();
   const [loading, setLoading] = React.useState(false);
@@ -286,32 +300,32 @@ const AudioPlayer = () => {
     if (player.volume < 1) {
       player.volume += 0.1;
     }
-  }
+  };
 
   const volumeDownHandler = () => {
     const player = playerRef?.current;
     if (player.volume > 0) {
       player.volume -= 0.1;
     }
-  }
+  };
 
   const nextSongHandler = () => {
     dispatch({
       type: 'NEXT_SONG'
     });
-  }
+  };
 
   const prevSongHandler = () => {
     dispatch({
       type: 'PREV_SONG'
     });
-  }
+  };
 
   const randomSongHandler = () => {
     dispatch({
       type: 'RANDOM_SONG'
     });
-  }
+  };
 
   const playPauseToggle = () => {
     const player = playerRef.current;
@@ -341,7 +355,11 @@ const AudioPlayer = () => {
           title: currentSong.title,
           artist: currentSong.uploader,
           artwork: [
-            { src: `https://img.youtube.com/vi/${currentSong.id}/0.jpg`, sizes: '480x480', type: 'image/png' }
+            {
+              src: `https://img.youtube.com/vi/${currentSong.id}/0.jpg`,
+              sizes: '480x480',
+              type: 'image/png'
+            }
           ]
         });
       }
@@ -350,7 +368,7 @@ const AudioPlayer = () => {
     let lastPercent = 0;
     playerRef.current.addEventListener('timeupdate', (e) => {
       const player = playerRef.current;
-      let percent = player.currentTime / player.duration * 100;
+      let percent = (player.currentTime / player.duration) * 100;
       setSongProgress(percent);
       setDuration({
         current: player.currentTime,
@@ -358,7 +376,7 @@ const AudioPlayer = () => {
       });
       if (~~percent !== lastPercent) {
         if (percent === 100) {
-          document.title = "Tubemusic";
+          document.title = 'Tubemusic';
           nextSongHandler();
         }
         lastPercent = ~~percent;
@@ -366,26 +384,26 @@ const AudioPlayer = () => {
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('play', function() {
+    navigator.mediaSession.setActionHandler('play', function () {
       const player = playerRef.current;
       player.play();
       setPlaying(true);
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('pause', function() {
+    navigator.mediaSession.setActionHandler('pause', function () {
       const player = playerRef.current;
       player.pause();
       setPlaying(false);
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('previoustrack', function() {
+    navigator.mediaSession.setActionHandler('previoustrack', function () {
       prevSongHandler();
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('nexttrack', function() {
+    navigator.mediaSession.setActionHandler('nexttrack', function () {
       nextSongHandler();
     });
   }, []);
@@ -393,10 +411,10 @@ const AudioPlayer = () => {
   React.useEffect(() => {
     (async () => {
       if (state.player) {
-        const current = state.player.currentSongIndex;
-        if (current !== -1) {
+        const current = state.player.currentSongId;
+        if (current !== '0') {
           setLoading(true);
-          const song = state.songs[current];
+          const song = state.songs.find((song) => song.id === current);
           currentSongRef.current = song;
           document.title = song.title;
 
@@ -410,7 +428,7 @@ const AudioPlayer = () => {
           dispatch({
             type: 'LISTEN_COUNT',
             value: song
-          })
+          });
         }
       }
     })();
@@ -420,7 +438,7 @@ const AudioPlayer = () => {
     if (playing) {
       const player = playerRef.current;
       const duration = player.duration;
-      const goTo = parseFloat((duration * percent / 100).toFixed(2));
+      const goTo = parseFloat(((duration * percent) / 100).toFixed(2));
       player.currentTime = goTo;
     }
   };
@@ -431,45 +449,46 @@ const AudioPlayer = () => {
         className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
         onClick={prevSongHandler}
       >
-        <SVG content={prevIcon}/>
+        <SVG content={prevIcon} />
       </button>
       <button
         className="flex items-center justify-center w-12 h-12 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
         onClick={playPauseToggle}
       >
-        <SVG content={playing ? pauseIcon : playIcon}/>
+        <SVG content={playing ? pauseIcon : playIcon} />
       </button>
       <button
         className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
         onClick={nextSongHandler}
       >
-        <SVG content={nextIcon}/>
+        <SVG content={nextIcon} />
       </button>
       {loading ? (
         <div className="flex-1 mx-5 text-sm text-center">
           <div className="w-5 h-5 mx-auto text-white animate-spin">
-            <SVG content={spinnerIcon}/>
+            <SVG content={spinnerIcon} />
           </div>
-        </div >
+        </div>
       ) : (
-        <ProgressBar
-          progress={songProgress}
-          onClick={songProgressClickHandler}
-        />
+        <ProgressBar progress={songProgress} onClick={songProgressClickHandler} />
       )}
-      <div className="px-3 font-mono text-sm text-center text-gray-500">{durationDisplay(duration.current)} / {durationDisplay(duration.full)}</div>
+      <div className="px-3 font-mono text-sm text-center text-gray-500">
+        {durationDisplay(duration.current)} / {durationDisplay(duration.full)}
+      </div>
     </div>
   );
 };
 
 const MediaPlayerArea = () => {
+  const { state, dispatch } = React.useContext(MediaPlayerContext);
+
   return (
     <div id="music-player" className="flex flex-col flex-1 max-h-screen">
       <div id="playlist" className="relative flex-1 overflow-hidden">
-        <MediaPlaylist/>
+        <MediaPlaylist dispatch={dispatch} state={state} />
       </div>
       <div id="player-control" className="flex h-auto shadow-lg">
-        <AudioPlayer/>
+        <AudioPlayer dispatch={dispatch} state={state} />
       </div>
     </div>
   );
@@ -478,12 +497,8 @@ const MediaPlayerArea = () => {
 const App = () => {
   return (
     <MediaPlayerStateProvider>
-      <div
-        className="flex flex-row w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black"
-      >
-        <div
-          className="flex flex-col flex-1 h-screen"
-        >
+      <div className="flex flex-row w-screen h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <div className="flex flex-col flex-1 h-screen">
           <MediaPlayerArea />
         </div>
         <SearchArea />
@@ -492,4 +507,4 @@ const App = () => {
   );
 };
 
-render(<App/>, document.querySelector("#app"));
+render(<App />, document.querySelector('#app'));

@@ -214,9 +214,14 @@
       "id": "EWz4fITO5qg",
       "title": "MIN x ĐEN x JUSTATEE - VÌ YÊU CỨ ĐÂM ĐẦU (VYCĐĐ) | OFFICIAL MUSIC VIDEO (민)",
       "uploader": "MIN OFFICIAL"
+    },
+    {
+      "id": "S7f24xceqSs",
+      "title": "MLEM MLEM | MIN X JUSTATEE X YUNO BIGBOI | OFFICIAL MUSIC VIDEO",
+      "uploader": "MIN OFFICIAL"
     }
   ],
   "player": {
-    "currentSongIndex": -1
+    "currentSongId": "0"
   }
 }
