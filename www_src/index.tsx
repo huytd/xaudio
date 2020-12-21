@@ -286,6 +286,7 @@ const MediaPlaylist = ({ state, dispatch }) => {
 
 const AudioPlayer = ({ dispatch, state }) => {
   const playerRef = React.useRef<HTMLAudioElement>();
+  const directStreamRef = React.useRef<HTMLInputElement>();
   const currentSongRef = React.useRef<any>();
   const [loading, setLoading] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
@@ -422,7 +423,12 @@ const AudioPlayer = ({ dispatch, state }) => {
             playerRef.current.pause();
           }
 
-          playerRef.current.src = `/api/stream?id=${song.id}`;
+          let songUrl = `/api/stream?id=${song.id}`;
+          if (directStreamRef.current.checked) {
+            songUrl = await API.getUrl(song.id);
+          }
+
+          playerRef.current.src = songUrl;
           playerRef.current.load();
 
           dispatch({
@@ -474,6 +480,10 @@ const AudioPlayer = ({ dispatch, state }) => {
       )}
       <div className="px-3 font-mono text-sm text-center text-gray-500">
         {durationDisplay(duration.current)} / {durationDisplay(duration.full)}
+      </div>
+      <div className="px-3 text-gray-500">
+        <input type="checkbox" name="direct-stream" className="mr-2" ref={directStreamRef}/>
+        <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">Direct Stream</label>
       </div>
     </div>
   );

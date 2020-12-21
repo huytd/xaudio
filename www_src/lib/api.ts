@@ -7,6 +7,6 @@ export const API = {
   },
   getUrl: async (song) => {
     const result = await axios.get(`/api/play?id=${song}`);
-    return result?.data;
+    return result?.data?.url || `/api/stream?id=${song}`;
   }
 };
