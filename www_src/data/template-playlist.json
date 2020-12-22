@@ -223,5 +223,9 @@
   ],
   "player": {
     "currentSongId": "0"
+  },
+  "setting": {
+    "isRandom": false,
+    "isRepeating": false
   }
 }

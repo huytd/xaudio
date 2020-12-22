@@ -15,6 +15,8 @@ import prevIcon from './img/prev.svg';
 import nextIcon from './img/next.svg';
 import deleteIcon from './img/delete.svg';
 import searchIcon from './img/search.svg';
+import shuffleIcon from './img/shuffle.svg';
+import repeatIcon from './img/repeat.svg';
 
 import './styles.css';
 import templateState from './data/template-playlist.json';
@@ -33,6 +35,10 @@ interface MediaPlayerState {
   player: {
     currentSongId: string;
   };
+  setting?: {
+    isRepeating?: boolean;
+    isRandom?: boolean;
+  };
 }
 
 interface Action {
@@ -40,13 +46,19 @@ interface Action {
   value?: any;
 }
 
+type ContextProps = {
+  state: MediaPlayerState;
+  dispatch: React.Dispatch<any>;
+};
+
 const savedState = window.localStorage.getItem('tubemusic-songs');
 const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
 
-const MediaPlayerContext = React.createContext({
+const MediaPlayerContext = React.createContext<ContextProps>({
   state: initialMediaPlayerState,
   dispatch: null
 });
+
 const MediaPlayerStateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state: MediaPlayerState, action: Action) => {
     switch (action.type) {
@@ -69,6 +81,7 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
+            ...state.player,
             currentSongId: action.value
           }
         };
@@ -76,15 +89,21 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
+            ...state.player,
             currentSongId: '0'
           }
         };
       case 'RANDOM_SONG':
-        let randomIndex = ~~(Math.random() * (state.songs.length - 1));
+        const getRandomSongId = (songId) => {
+          const randomIndex = ~~(Math.random() * (state.songs.length - 1));
+          return state.songs[randomIndex].id !== songId ? state.songs[randomIndex].id : getRandomSongId(songId);
+        };
+        const nextSongId = getRandomSongId(state.player.currentSongId);
         return {
           ...state,
           player: {
-            currentSongId: state.songs[randomIndex].id
+            ...state.player,
+            currentSongId: nextSongId
           }
         };
       case 'NEXT_SONG':
@@ -97,6 +116,7 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
+            ...state.player,
             currentSongId: state.songs[idx].id
           }
         };
@@ -110,9 +130,28 @@ const MediaPlayerStateProvider = ({ children }) => {
         return {
           ...state,
           player: {
+            ...state.player,
             currentSongId: state.songs[pidx].id
           }
         };
+      case 'REPEAT_SONG': {
+        return {
+          ...state,
+          player: {
+            ...state.player,
+            lastRepeatTime: new Date().getTime()
+          }
+        };
+      }
+      case 'CHANGE_SETTING': {
+        return {
+          ...state,
+          setting: {
+            ...state.setting,
+            ...action.value
+          }
+        };
+      }
       default:
         throw new Error();
     }
@@ -249,39 +288,39 @@ const MediaPlaylist = ({ state, dispatch }) => {
   return (
     <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
       <ReactSortable list={state.songs} setList={sortPlaylistHandler}>
-      {state.songs.map((song, i) => {
-        const isCurrent = state.player?.currentSongId === song.id;
-        return (
-          <div
-            key={song.id}
-            className={classnames(
-              'group grid grid-cols-10 border-b border-gray-800 cursor-pointer hover:bg-gray-800',
-              'items-center',
-              { 'text-green-500': isCurrent },
-              { 'text-gray-300': !isCurrent }
-            )}
-          >
-            <div className="flex flex-row items-center p-2 col-span-6" onClick={() => playClickHandler(song.id)}>
-              <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">
-                {i + 1}
+        {state.songs.map((song, i) => {
+          const isCurrent = state.player?.currentSongId === song.id;
+          return (
+            <div
+              key={song.id}
+              className={classnames(
+                'group grid grid-cols-10 border-b border-gray-800 cursor-pointer hover:bg-gray-800',
+                'items-center',
+                { 'text-green-500': isCurrent },
+                { 'text-gray-300': !isCurrent }
+              )}
+            >
+              <div className="flex flex-row items-center p-2 col-span-6" onClick={() => playClickHandler(song.id)}>
+                <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">
+                  {i + 1}
+                </div>
+                <div className="flex-1 hover:text-green-200">{song.title}</div>
               </div>
-              <div className="flex-1 hover:text-green-200">{song.title}</div>
+              <div className="p-2 col-span-2">{song.uploader}</div>
+              <div className="p-2 col-span-1"></div>
+              <div className="p-2 col-span-1">
+                <button
+                  className={classnames(
+                    'w-8 h-8 flex float-right mx-5 items-center justify-center text-white opacity-10 hover:opacity-100 hover:text-red-500'
+                  )}
+                  onClick={() => deleteClickHandler(song)}
+                >
+                  <SVG content={deleteIcon} />
+                </button>
+              </div>
             </div>
-            <div className="p-2 col-span-2">{song.uploader}</div>
-            <div className="p-2 col-span-1"></div>
-            <div className="p-2 col-span-1">
-              <button
-                className={classnames(
-                  'w-8 h-8 flex float-right mx-5 items-center justify-center text-white opacity-10 hover:opacity-100 hover:text-red-500'
-                )}
-                onClick={() => deleteClickHandler(song)}
-              >
-                <SVG content={deleteIcon} />
-              </button>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
       </ReactSortable>
     </div>
   );
@@ -314,9 +353,15 @@ const AudioPlayer = ({ dispatch, state }) => {
   };
 
   const nextSongHandler = () => {
-    dispatch({
-      type: 'NEXT_SONG'
-    });
+    if (state?.setting?.isRandom) {
+      dispatch({
+        type: 'RANDOM_SONG'
+      });
+    } else {
+      dispatch({
+        type: 'NEXT_SONG'
+      });
+    }
   };
 
   const prevSongHandler = () => {
@@ -325,11 +370,13 @@ const AudioPlayer = ({ dispatch, state }) => {
     });
   };
 
-  const randomSongHandler = () => {
-    dispatch({
-      type: 'RANDOM_SONG'
-    });
-  };
+  const repeatSongHandler = () => {
+    dispatch({ type: 'REPEAT_SONG' })
+  }
+
+  const changeSettingHandler = (setting: string) => {
+    dispatch({ type: 'CHANGE_SETTING', value: { [setting]: !state?.setting?.[setting] }})
+  }
 
   const playPauseToggle = () => {
     const player = playerRef.current;
@@ -381,7 +428,11 @@ const AudioPlayer = ({ dispatch, state }) => {
       if (~~percent !== lastPercent) {
         if (percent === 100) {
           document.title = 'Tubemusic';
-          nextSongHandler();
+          if (state?.setting?.isRepeating) {
+            repeatSongHandler()
+          } else {
+            nextSongHandler();
+          }
         }
         lastPercent = ~~percent;
       }
@@ -450,22 +501,42 @@ const AudioPlayer = ({ dispatch, state }) => {
   return (
     <div className="flex flex-row items-center flex-1 p-3 bg-gray-800 border-t border-gray-700">
       <button
-        className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
+        className={classnames(
+          'w-8 h-8 rounded-full mr-2 flex items-center justify-center bg-gray-600 hover:bg-gray-500 focus:outline-none focus:ring',
+          { 'text-green-500': state?.setting?.isRandom },
+          { 'text-white': !state?.setting?.isRandom }
+        )}
+        onClick={() => changeSettingHandler('isRandom')}
+      >
+        <SVG content={shuffleIcon} />
+      </button>
+      <button
+        className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500 focus:outline-none focus:ring"
         onClick={prevSongHandler}
       >
         <SVG content={prevIcon} />
       </button>
       <button
-        className="flex items-center justify-center w-12 h-12 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
+        className="flex items-center justify-center w-12 h-12 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500 focus:outline-none focus:ring"
         onClick={playPauseToggle}
       >
         <SVG content={playing ? pauseIcon : playIcon} />
       </button>
       <button
-        className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500"
+        className="flex items-center justify-center w-8 h-8 mr-2 text-white bg-gray-600 rounded-full hover:bg-gray-500 focus:outline-none focus:ring"
         onClick={nextSongHandler}
       >
         <SVG content={nextIcon} />
+      </button>
+      <button
+        className={classnames(
+          'w-8 h-8 rounded-full mr-2 flex items-center justify-center bg-gray-600 hover:bg-gray-500 focus:outline-none focus:ring',
+          { 'text-green-500': state?.setting?.isRepeating },
+          { 'text-white': !state?.setting?.isRepeating }
+        )}
+        onClick={() => changeSettingHandler('isRepeating')}
+      >
+        <SVG content={repeatIcon} />
       </button>
       {loading ? (
         <div className="flex-1 mx-5 text-sm text-center">
@@ -480,8 +551,10 @@ const AudioPlayer = ({ dispatch, state }) => {
         {durationDisplay(duration.current)} / {durationDisplay(duration.full)}
       </div>
       <div className="px-3 text-gray-500">
-        <input type="checkbox" name="direct-stream" className="mr-2" ref={directStreamRef}/>
-        <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">Direct Stream</label>
+        <input type="checkbox" name="direct-stream" className="mr-2" ref={directStreamRef} />
+        <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">
+          Direct Stream
+        </label>
       </div>
     </div>
   );
