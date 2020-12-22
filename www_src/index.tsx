@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { render } from 'react-dom';
 import classnames from 'classnames';
+import { ReactSortable } from 'react-sortablejs';
 
 import { SVG } from './components/svg';
 import { ProgressBar } from './components/progress-bar';
@@ -40,9 +41,7 @@ interface Action {
 }
 
 const savedState = window.localStorage.getItem('tubemusic-songs');
-let initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
-// Sort songs based on listen count
-initialMediaPlayerState.songs.sort((a, b) => (b.listenCount || 0) - (a.listenCount || 0));
+const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
 
 const MediaPlayerContext = React.createContext({
   state: initialMediaPlayerState,
@@ -51,15 +50,10 @@ const MediaPlayerContext = React.createContext({
 const MediaPlayerStateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state: MediaPlayerState, action: Action) => {
     switch (action.type) {
-      case 'LISTEN_COUNT':
+      case 'SORT_PLAYLIST':
         return {
           ...state,
-          songs: state.songs.map((song) => {
-            if (song.id === action.value.id) {
-              song.listenCount = (song.listenCount || 0) + 1;
-            }
-            return song;
-          })
+          songs: action.value
         };
       case 'ADD_SONG':
         return {
@@ -245,13 +239,21 @@ const MediaPlaylist = ({ state, dispatch }) => {
     });
   };
 
+  const sortPlaylistHandler = (playlist) => {
+    dispatch({
+      type: 'SORT_PLAYLIST',
+      value: playlist
+    });
+  };
+
   return (
     <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
+      <ReactSortable list={state.songs} setList={sortPlaylistHandler}>
       {state.songs.map((song, i) => {
         const isCurrent = state.player?.currentSongId === song.id;
         return (
           <div
-            key={i}
+            key={song.id}
             className={classnames(
               'group grid grid-cols-10 border-b border-gray-800 cursor-pointer hover:bg-gray-800',
               'items-center',
@@ -280,6 +282,7 @@ const MediaPlaylist = ({ state, dispatch }) => {
           </div>
         );
       })}
+      </ReactSortable>
     </div>
   );
 };
@@ -430,11 +433,6 @@ const AudioPlayer = ({ dispatch, state }) => {
 
           playerRef.current.src = songUrl;
           playerRef.current.load();
-
-          dispatch({
-            type: 'LISTEN_COUNT',
-            value: song
-          });
         }
       }
     })();

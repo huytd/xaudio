@@ -15,3 +15,10 @@ export const durationDisplay = counter => {
   const sec = ~~(remain % 60);
   return `${hrs > 0 ? pad(hrs) + ':' : ''}${pad(min)}:${pad(sec)}`;
 };
+
+export const arrayMove = (arr, from, to) => {
+  const el = arr.splice(from, 1);
+  const left = arr.splice(0, to);
+  const right = arr;
+  return [].concat(left, el, right);
+};
