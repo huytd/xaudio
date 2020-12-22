@@ -398,44 +398,6 @@ const AudioPlayer = ({ dispatch, state }) => {
       setLoading(false);
       setPlaying(true);
       playerRef.current.play();
-
-      const currentSong = currentSongRef.current;
-      if (currentSong) {
-        // @ts-ignore
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: currentSong.title,
-          artist: currentSong.uploader,
-          artwork: [
-            {
-              src: `https://img.youtube.com/vi/${currentSong.id}/0.jpg`,
-              sizes: '480x480',
-              type: 'image/png'
-            }
-          ]
-        });
-      }
-    });
-
-    let lastPercent = 0;
-    playerRef.current.addEventListener('timeupdate', (e) => {
-      const player = playerRef.current;
-      let percent = (player.currentTime / player.duration) * 100;
-      setSongProgress(percent);
-      setDuration({
-        current: player.currentTime,
-        full: player.duration
-      });
-      if (~~percent !== lastPercent) {
-        if (percent === 100) {
-          document.title = 'Tubemusic';
-          if (state?.setting?.isRepeating) {
-            repeatSongHandler()
-          } else {
-            nextSongHandler();
-          }
-        }
-        lastPercent = ~~percent;
-      }
     });
 
     // @ts-ignore
@@ -462,6 +424,48 @@ const AudioPlayer = ({ dispatch, state }) => {
       nextSongHandler();
     });
   }, []);
+
+  React.useEffect(() => {
+    const checkProgress = () => {
+      const player = playerRef.current;
+      let percent = (player.currentTime / player.duration) * 100;
+      setSongProgress(percent);
+      setDuration({
+        current: player.currentTime,
+        full: player.duration
+      });
+      if (percent === 100) {
+        document.title = 'Tubemusic';
+        if (state?.setting?.isRepeating) {
+          repeatSongHandler()
+        } else {
+          nextSongHandler();
+        }
+      }
+    };
+    playerRef.current.addEventListener('timeupdate', checkProgress)
+    return () => {
+      playerRef.current.removeEventListener('timeupdate', checkProgress) 
+    }
+  }, [state?.setting])
+
+  React.useEffect(() => {
+    const currentSong = currentSongRef?.current;
+    if (currentSong) {
+      // @ts-ignore
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.uploader,
+        artwork: [
+          {
+            src: `https://img.youtube.com/vi/${currentSong.id}/0.jpg`,
+            sizes: '480x480',
+            type: 'image/png'
+          }
+        ]
+      });
+    }
+  }, [currentSongRef?.current])
 
   React.useEffect(() => {
     (async () => {
