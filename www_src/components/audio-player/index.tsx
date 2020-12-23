@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Fragment } from 'react';
+import {Fragment} from 'react';
 import classnames from 'classnames';
 
 import {MediaPlayerContext} from '~/MediaPlayerState';
@@ -48,27 +48,27 @@ export const AudioPlayer = () => {
   const nextSongHandler = () => {
     if (state?.setting?.isRandom) {
       dispatch({
-        type: 'RANDOM_SONG',
+        type: 'RANDOM_SONG'
       });
     } else {
       dispatch({
-        type: 'NEXT_SONG',
+        type: 'NEXT_SONG'
       });
     }
   };
 
   const prevSongHandler = () => {
     dispatch({
-      type: 'PREV_SONG',
+      type: 'PREV_SONG'
     });
   };
 
   const repeatSongHandler = () => {
-    dispatch({ type: 'REPEAT_SONG' });
+    dispatch({type: 'REPEAT_SONG'});
   };
 
   const changeSettingHandler = (setting: string) => {
-    dispatch({ type: 'CHANGE_SETTING', value: { [setting]: !state?.setting?.[setting] } });
+    dispatch({type: 'CHANGE_SETTING', value: {[setting]: !state?.setting?.[setting]}});
   };
 
   const playPauseToggle = () => {
@@ -141,7 +141,7 @@ export const AudioPlayer = () => {
       setSongProgress(percent);
       setDuration({
         current: player.currentTime,
-        full: player.duration,
+        full: player.duration
       });
       if (percent === 100) {
         document.title = 'Tubemusic';
@@ -212,14 +212,14 @@ export const AudioPlayer = () => {
       </div>
 
       {/* Center section */}
-      <div className={"w-1/3 flex flex-col items-center"}>
+      <div className="w-1/3 flex flex-col items-center">
         {/* Control buttons */}
-        <div className={"width-full flex flex-row items-center"}>
+        <div className="width-full flex flex-row items-center">
           <button
             className={classnames(
               'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
-              { 'text-green-500': state?.setting?.isRandom },
-              { 'text-white': !state?.setting?.isRandom }
+              {'text-green-500': state?.setting?.isRandom},
+              {'text-white': !state?.setting?.isRandom}
             )}
             onClick={() => changeSettingHandler('isRandom')}
           >
@@ -246,8 +246,8 @@ export const AudioPlayer = () => {
           <button
             className={classnames(
               'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
-              { 'text-green-500': state?.setting?.isRepeating },
-              { 'text-white': !state?.setting?.isRepeating }
+              {'text-green-500': state?.setting?.isRepeating},
+              {'text-white': !state?.setting?.isRepeating}
             )}
             onClick={() => changeSettingHandler('isRepeating')}
           >
@@ -255,10 +255,8 @@ export const AudioPlayer = () => {
           </button>
         </div>
         {/* Timeline */}
-        <div className={"w-full flex-1 mt-2 flex-shrink-0 flex flex-row items-center"}>
-          <div className="px-3 font-mono text-sm text-center text-gray-500">
-            {durationDisplay(duration.current)}
-          </div>
+        <div className="w-full flex-1 mt-2 flex-shrink-0 flex flex-row items-center">
+          <div className="px-3 font-mono text-sm text-center text-gray-500">{durationDisplay(duration.current)}</div>
           {loading ? (
             <div className="flex-1 mx-5 text-sm text-center">
               <div className="w-5 h-5 mx-auto text-white animate-spin">
@@ -268,20 +266,19 @@ export const AudioPlayer = () => {
           ) : (
             <ProgressBar progress={songProgress} onClick={songProgressClickHandler} />
           )}
-          <div className="px-3 font-mono text-sm text-center text-gray-500">
-            {durationDisplay(duration.full)}
-          </div>
+          <div className="px-3 font-mono text-sm text-center text-gray-500">{durationDisplay(duration.full)}</div>
         </div>
       </div>
 
       {/* Right section */}
-      <div className={"w-1/3 flex flex-row justify-end"}>
+      <div className="w-1/3 flex flex-row justify-end">
         <div className="px-3 text-gray-500">
           <input type="checkbox" name="direct-stream" className="mr-2" ref={directStreamRef} />
-          <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">Direct Stream</label>
+          <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">
+            Direct Stream
+          </label>
         </div>
       </div>
     </div>
   );
 };
-
