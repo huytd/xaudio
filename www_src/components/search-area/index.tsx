@@ -13,10 +13,17 @@ import checkIcon from '~/img/check.svg';
 export const SearchEntries = ({ items }) => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
 
-  const entryClickHandler = ({ title, id, uploader }) => {
+  const addSongHandler = ({ title, id, uploader }) => {
     dispatch({
       type: 'ADD_SONG',
       value: { title, id, uploader, listenCount: 0 }
+    });
+  };
+
+  const previewSongHandler = ({ title, id, uploader }) => {
+    dispatch({
+      type: 'PREVIEW_SONG',
+      value: { title, id, uploader }
     });
   };
 
@@ -30,25 +37,36 @@ export const SearchEntries = ({ items }) => {
     return (
       <li
         key={i}
-        onClick={() => entryClickHandler(item)}
         className={classnames('group p-3 border-b border-gray-700 flex flex-row cursor-pointer hover:bg-gray-800', {
           'opacity-25 pointer-events-none': disabled
         })}
       >
         <div
+          onClick={() => addSongHandler(item)}
           className={classnames(
             'w-8 h-8 mr-2 flex items-center justify-center flex-shrink-0',
-            { 'text-white group-hover:text-green-500': !disabled },
+            { 'text-white hover:text-green-500': !disabled },
             { 'text-gray-600': disabled }
           )}
         >
           <SVG content={disabled ? checkIcon : plusIcon} />
         </div>
-        <div className="items-center flex-1">
+        <div
+          className="w-10 h-10 mr-2 bg-gray-900"
+          style={{
+            backgroundImage: `url(https://img.youtube.com/vi/${item.id}/mqdefault.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center'
+          }}
+        />
+        <div
+          className="items-center flex-1"
+          onClick={() => previewSongHandler(item)}
+        >
           <div className="font-medium text-white">{item.title}</div>
           <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
-            <div className="flex-1 font-medium text-right"></div>
+            <div className="flex-1 font-medium text-right"/>
           </div>
         </div>
       </li>

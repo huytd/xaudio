@@ -109,7 +109,7 @@ export const AudioPlayer = () => {
       });
       if (~~percent !== lastPercent) {
         if (percent === 100) {
-          document.title = 'Tubemusic';
+          document.title = 'Xaudio.me';
           nextSongHandler();
         }
         lastPercent = ~~percent;
@@ -147,6 +147,7 @@ export const AudioPlayer = () => {
         const current = state.player.currentSongId;
         if (current !== '0') {
           setLoading(true);
+          // TODO: Make this independent from state.songs, so we can have PREVIEW_SONG feature
           const song = state.songs.find((song) => song.id === current);
           currentSongRef.current = song;
           document.title = song.title;
@@ -198,30 +199,6 @@ export const AudioPlayer = () => {
       <div className={"w-1/3 flex flex-col items-center"}>
         {/* Control buttons */}
         <div className={"width-full flex flex-row items-center"}>
-          <button
-            className="flex items-center justify-center w-6 h-6 text-white"
-            onClick={prevSongHandler}
-          >
-            <SVG content={prevIcon} />
-          </button>
-          <button
-            className="flex items-center justify-center w-8 h-8 mx-2 text-white border border-white rounded-full"
-            onClick={playPauseToggle}
-          >
-            <SVG content={playing ? pauseIcon : playIcon} />
-          </button>
-          <button
-            className="flex items-center justify-center w-6 h-6 text-white"
-            onClick={nextSongHandler}
-          >
-            <SVG content={nextIcon} />
-          </button>
-        </div>
-        {/* Timeline */}
-        <div className={"w-full flex-1 mt-2 flex-shrink-0 flex flex-row items-center"}>
-          <div className="px-3 font-mono text-sm text-center text-gray-500">
-            {durationDisplay(duration.current)}
-          </div>
           {loading ? (
             <div className="flex-1 mx-5 text-sm text-center">
               <div className="w-5 h-5 mx-auto text-white animate-spin">
@@ -229,8 +206,34 @@ export const AudioPlayer = () => {
               </div>
             </div>
           ) : (
-            <ProgressBar progress={songProgress} onClick={songProgressClickHandler} />
+            <Fragment>
+              <button
+                className="flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none"
+                onClick={prevSongHandler}
+              >
+                <SVG content={prevIcon} />
+              </button>
+              <button
+                className="flex items-center justify-center w-8 h-8 mx-4 text-white opacity-75 hover:opacity-100 border border-white rounded-full outline-none"
+                onClick={playPauseToggle}
+              >
+                <SVG content={playing ? pauseIcon : playIcon} />
+              </button>
+              <button
+                className="flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none"
+                onClick={nextSongHandler}
+              >
+                <SVG content={nextIcon} />
+              </button>
+            </Fragment>
           )}
+        </div>
+        {/* Timeline */}
+        <div className={"w-full flex-1 mt-2 flex-shrink-0 flex flex-row items-center"}>
+          <div className="px-3 font-mono text-sm text-center text-gray-500">
+            {durationDisplay(duration.current)}
+          </div>
+          <ProgressBar progress={songProgress} onClick={songProgressClickHandler} />
           <div className="px-3 font-mono text-sm text-center text-gray-500">
             {durationDisplay(duration.full)}
           </div>
