@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Fragment } from 'react';
+import classnames from 'classnames';
 
 import {MediaPlayerContext} from '~/MediaPlayerState';
 import {SVG} from '~/components/svg';
@@ -13,6 +14,8 @@ import playIcon from '~/img/play-icon.svg';
 import pauseIcon from '~/img/pause-icon.svg';
 import prevIcon from '~/img/backward-icon.svg';
 import nextIcon from '~/img/forward-icon.svg';
+import shuffleIcon from '~/img/shuffle-icon.svg';
+import repeatIcon from '~/img/repeat-icon.svg';
 
 export const AudioPlayer = () => {
   const {state, dispatch} = React.useContext(MediaPlayerContext);
@@ -43,21 +46,29 @@ export const AudioPlayer = () => {
   };
 
   const nextSongHandler = () => {
-    dispatch({
-      type: 'NEXT_SONG'
-    });
+    if (state?.setting?.isRandom) {
+      dispatch({
+        type: 'RANDOM_SONG',
+      });
+    } else {
+      dispatch({
+        type: 'NEXT_SONG',
+      });
+    }
   };
 
   const prevSongHandler = () => {
     dispatch({
-      type: 'PREV_SONG'
+      type: 'PREV_SONG',
     });
   };
 
-  const randomSongHandler = () => {
-    dispatch({
-      type: 'RANDOM_SONG'
-    });
+  const repeatSongHandler = () => {
+    dispatch({ type: 'REPEAT_SONG' });
+  };
+
+  const changeSettingHandler = (setting: string) => {
+    dispatch({ type: 'CHANGE_SETTING', value: { [setting]: !state?.setting?.[setting] } });
   };
 
   const playPauseToggle = () => {
@@ -98,24 +109,6 @@ export const AudioPlayer = () => {
       }
     });
 
-    let lastPercent = 0;
-    playerRef.current.addEventListener('timeupdate', (e) => {
-      const player = playerRef.current;
-      let percent = (player.currentTime / player.duration) * 100;
-      setSongProgress(percent);
-      setDuration({
-        current: player.currentTime,
-        full: player.duration
-      });
-      if (~~percent !== lastPercent) {
-        if (percent === 100) {
-          document.title = 'Tubemusic';
-          nextSongHandler();
-        }
-        lastPercent = ~~percent;
-      }
-    });
-
     // @ts-ignore
     navigator.mediaSession.setActionHandler('play', function () {
       const player = playerRef.current;
@@ -140,6 +133,30 @@ export const AudioPlayer = () => {
       nextSongHandler();
     });
   }, []);
+
+  React.useEffect(() => {
+    const checkProgress = () => {
+      const player = playerRef.current;
+      let percent = (player.currentTime / player.duration) * 100;
+      setSongProgress(percent);
+      setDuration({
+        current: player.currentTime,
+        full: player.duration,
+      });
+      if (percent === 100) {
+        document.title = 'Tubemusic';
+        if (state?.setting?.isRepeating) {
+          repeatSongHandler();
+        } else {
+          nextSongHandler();
+        }
+      }
+    };
+    playerRef.current.addEventListener('timeupdate', checkProgress);
+    return () => {
+      playerRef.current.removeEventListener('timeupdate', checkProgress);
+    };
+  }, [state?.setting]);
 
   React.useEffect(() => {
     (async () => {
@@ -199,22 +216,42 @@ export const AudioPlayer = () => {
         {/* Control buttons */}
         <div className={"width-full flex flex-row items-center"}>
           <button
-            className="flex items-center justify-center w-6 h-6 text-white"
+            className={classnames(
+              'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
+              { 'text-green-500': state?.setting?.isRandom },
+              { 'text-white': !state?.setting?.isRandom }
+            )}
+            onClick={() => changeSettingHandler('isRandom')}
+          >
+            <SVG content={shuffleIcon} />
+          </button>
+          <button
+            className="flex items-center justify-center w-6 h-6 text-white focus:outline-none"
             onClick={prevSongHandler}
           >
             <SVG content={prevIcon} />
           </button>
           <button
-            className="flex items-center justify-center w-8 h-8 mx-2 text-white border border-white rounded-full"
+            className="flex items-center justify-center w-8 h-8 mx-2 text-white border border-white rounded-full focus:outline-none"
             onClick={playPauseToggle}
           >
             <SVG content={playing ? pauseIcon : playIcon} />
           </button>
           <button
-            className="flex items-center justify-center w-6 h-6 text-white"
+            className="flex items-center justify-center w-6 h-6 text-white focus:outline-none"
             onClick={nextSongHandler}
           >
             <SVG content={nextIcon} />
+          </button>
+          <button
+            className={classnames(
+              'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
+              { 'text-green-500': state?.setting?.isRepeating },
+              { 'text-white': !state?.setting?.isRepeating }
+            )}
+            onClick={() => changeSettingHandler('isRepeating')}
+          >
+            <SVG content={repeatIcon} />
           </button>
         </div>
         {/* Timeline */}
