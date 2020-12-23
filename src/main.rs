@@ -46,10 +46,14 @@ async fn stream(param: web::Query<PlayQuery>) -> impl Responder {
         let response = youtube::get_song_stream(&url).await;
         match response {
             Ok(body) => {
+                let headers = body.headers().clone();
                 let stream = body.bytes_stream().map(|item| item.map_err(|_| HttpResponse::Gone()));
-                return HttpResponse::Ok()
-                    .header("Content-Type", "audio/webm")
-                    .streaming(stream);
+                let mut builder = HttpResponse::Ok();
+                for key in headers.keys() {
+                    let value = headers.get(key).unwrap().to_str().unwrap();
+                    builder.header(key.as_str(), value);
+                }
+                return builder.streaming(stream);
             },
             Err(_) => {
                 return HttpResponse::NotFound().json(json!({ "success": false }));

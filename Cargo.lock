@@ -58,9 +58,9 @@ dependencies = [
 
 [[package]]
 name = "actix-http"
-version = "2.1.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "404df68c297f73b8d36c9c9056404913d25905a8f80127b0e5fe147c9c4b9f02"
+checksum = "452299e87817ae5673910e53c243484ca38be3828db819b6011736fc6982e874"
 dependencies = [
  "actix-codec",
  "actix-connect",
@@ -97,7 +97,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "serde_urlencoded 0.6.1",
+ "serde_urlencoded",
  "sha-1",
  "slab",
  "time",
@@ -234,9 +234,9 @@ dependencies = [
 
 [[package]]
 name = "actix-web"
-version = "3.2.0"
+version = "3.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88344b7a5ef27e5e09e73565379f69273dd3e2d29e82afc381b84d170d0a5631"
+checksum = "e641d4a172e7faa0862241a20ff4f1f5ab0ab7c279f00c2d4587b77483477b86"
 dependencies = [
  "actix-codec",
  "actix-http",
@@ -264,7 +264,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "serde_urlencoded 0.6.1",
+ "serde_urlencoded",
  "socket2",
  "time",
  "tinyvec",
@@ -325,9 +325,9 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "awc"
-version = "2.0.1"
+version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "425980a1e58e5030a3e4b065a3d577c8f0e16142ea9d81f30614eae810c98577"
+checksum = "b381e490e7b0cfc37ebc54079b0413d8093ef43d14a4e4747083f7fa47a9e691"
 dependencies = [
  "actix-codec",
  "actix-http",
@@ -344,7 +344,7 @@ dependencies = [
  "rand",
  "serde",
  "serde_json",
- "serde_urlencoded 0.6.1",
+ "serde_urlencoded",
 ]
 
 [[package]]
@@ -594,12 +594,6 @@ name = "discard"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
-
-[[package]]
-name = "dtoa"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134951f4028bdadb9b84baf4232681efbf277da25144b9b0ad65df75946c422b"
 
 [[package]]
 name = "either"
@@ -1509,7 +1503,7 @@ dependencies = [
  "pin-project-lite 0.2.0",
  "serde",
  "serde_json",
- "serde_urlencoded 0.7.0",
+ "serde_urlencoded",
  "tokio",
  "tokio-tls",
  "url",
@@ -1640,18 +1634,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "serde_urlencoded"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ec5d77e2d4c73717816afac02670d5c4f534ea95ed430442cad02e7a6e32c97"
-dependencies = [
- "dtoa",
- "itoa",
- "serde",
- "url",
 ]
 
 [[package]]
