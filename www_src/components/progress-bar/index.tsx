@@ -14,7 +14,7 @@ export const ProgressBar = ({ progress = 0, onClick = undefined }) => {
       className="flex-1 h-2 mx-5 border border-gray-500 rounded-lg"
       onClick={clickHandler}
     >
-      <div className="h-full bg-gray-300" style={{ pointerEvents: 'none', width: `${progress}%` }}></div>
+      <div className="h-full bg-gray-300" style={{pointerEvents: 'none', width: `${progress}%`}}/>
     </div >
   );
 };

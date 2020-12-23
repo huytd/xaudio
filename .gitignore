@@ -5,3 +5,4 @@ yarn-error
 .parcel-cache
 .DS_Store
 www
+.idea

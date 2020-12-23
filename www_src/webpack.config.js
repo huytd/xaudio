@@ -76,7 +76,8 @@ const config = {
       template: require('html-webpack-template'),
       mobile: true,
       appMountId: 'app',
-      filename: 'index.html'
+      filename: 'index.html',
+      headHtmlSnippet: `<link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">`
     }),
     new CleanWebpackPlugin()
   ],
