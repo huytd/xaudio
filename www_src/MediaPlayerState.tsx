@@ -101,6 +101,11 @@ export const MediaPlayerStateProvider = ({children}) => {
           ...state,
           directStream: action.value
         };
+      case 'SET_VOLUME':
+        return {
+          ...state,
+          volume: action.value
+        };
       default:
         throw new Error();
     }

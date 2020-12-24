@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import {MediaPlayerContext} from '~/MediaPlayerState';
 import {SVG} from '~/components/svg';
 import {ProgressBar} from '~/components/progress-bar';
+import {VolumeControl} from "~/components/volume-control";
 
 import {durationDisplay} from '~/lib/utils';
 import {API} from '~/lib/api';
@@ -27,20 +28,6 @@ export const AudioPlayer = () => {
     current: 0,
     full: 0
   });
-
-  const volumeUpHandler = () => {
-    const player = playerRef?.current;
-    if (player.volume < 1) {
-      player.volume += 0.1;
-    }
-  };
-
-  const volumeDownHandler = () => {
-    const player = playerRef?.current;
-    if (player.volume > 0) {
-      player.volume -= 0.1;
-    }
-  };
 
   const nextSongHandler = () => {
     dispatch({
@@ -183,6 +170,18 @@ export const AudioPlayer = () => {
     }
   };
 
+  const volumeChangedHandler = (percent) => {
+    dispatch({
+      type: 'SET_VOLUME',
+      value: percent
+    })
+  };
+
+  React.useEffect(() => {
+    const player = playerRef?.current;
+    player.volume = state.volume / 100;
+  }, [state.volume]);
+
   return (
     <div className="flex flex-row items-center flex-1 p-3 bg-gray-800 border-t border-gray-700">
       {/* Left section */}
@@ -249,6 +248,15 @@ export const AudioPlayer = () => {
 
       {/* Right section */}
       <div className={"w-1/3 flex flex-row justify-end"}>
+        {/* Volume control */}
+        <div className={"px-3 mx-3"}>
+          <VolumeControl
+            volume={state.volume || 100}
+            onVolumeChanged={volumeChangedHandler}
+          />
+        </div>
+
+        {/* Direct stream option */}
         <div className="px-3 text-gray-500">
           <input
             type="checkbox"
