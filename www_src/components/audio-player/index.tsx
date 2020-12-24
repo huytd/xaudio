@@ -179,7 +179,7 @@ export const AudioPlayer = () => {
 
   React.useEffect(() => {
     const player = playerRef?.current;
-    player.volume = state.volume / 100;
+    player.volume = (state.volume || 100) / 100;
   }, [state.volume]);
 
   return (
