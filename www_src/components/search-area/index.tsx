@@ -93,7 +93,7 @@ export const SearchArea = ({ toggleSearchHandler }) => {
   };
 
   return (
-    <div id="search-area" className="flex flex-col w-full sm:w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
+    <div id="search-area" className="flex flex-col w-full md:w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
       <div className="px-3 py-2 border-b border-gray-700 text-white">
         <div className="m-0 text-bold">Search</div>
         <button

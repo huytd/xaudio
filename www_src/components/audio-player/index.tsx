@@ -200,7 +200,7 @@ export const AudioPlayer = () => {
         {currentSongRef.current && (
           <Fragment>
             <div
-              className="flex-shrink-0 sm:hidden md:w-12 md:h-12 mr-3 bg-red-500"
+              className="flex-shrink-0 hidden md:flex md:w-12 md:h-12 mr-3 bg-red-500"
               style={{
                 backgroundImage: `url(https://img.youtube.com/vi/${currentSongRef.current?.id}/mqdefault.jpg)`,
                 backgroundSize: 'cover',
