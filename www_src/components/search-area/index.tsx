@@ -64,7 +64,7 @@ export const SearchEntries = ({ items }) => {
           className="items-center flex-1"
           onClick={() => previewSongHandler(item)}
         >
-          <div className="font-medium text-white">{item.title}</div>
+          <div className="text-sm md:text-base text-white pr-2 md:p-0">{item.title}</div>
           <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
             <div className="flex-1 font-medium text-right"/>
@@ -98,7 +98,7 @@ export const SearchArea = ({ toggleSearchHandler }) => {
         <div className="m-0 text-bold">Search</div>
         <button
           className={
-            'text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 p-2 outline-none'
+            'text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 p-2 focus:outline-none'
           }
           onClick={toggleSearchHandler}
         >
@@ -110,7 +110,7 @@ export const SearchArea = ({ toggleSearchHandler }) => {
           <SVG content={searchIcon} />
         </div>
         <input
-          className="flex-1 text-white bg-gray-600 outline-none"
+          className="flex-1 text-white bg-gray-600 focus:outline-none"
           ref={searchInputRef}
           type="text"
           placeholder="Search by song title or artist..."
@@ -122,7 +122,7 @@ export const SearchArea = ({ toggleSearchHandler }) => {
         </div>
       ) : (
           <div className="relative flex-1 overflow-hidden">
-            <ul className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{right: -17}}>
+            <ul className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
               <SearchEntries items={searchResult} />
             </ul>
           </div>

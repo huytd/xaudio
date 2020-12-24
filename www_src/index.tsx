@@ -27,20 +27,20 @@ const App = () => {
           <div className="relative flex flex-row flex-1 pl-2 overflow-hidden">
             <MediaPlaylist />
             <button
-              className={"text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 m-5 outline-none"}
+              className={"text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 m-5 focus:outline-none"}
               onClick={toggleSearchHandler}
             >
               {!showSearch ? (
                 <Fragment>
                   <SVG content={searchIcon} className={'mr-2'} />
-                  Search
+                  <span className={"hidden md:block"}>Search</span>
                 </Fragment>
               ) : null}
             </button>
           </div>
           {showSearch && <SearchArea toggleSearchHandler={toggleSearchHandler} />}
         </div>
-        <div className="h-22 flex">
+        <div className="h-32 md:h-24 flex">
           <AudioPlayer />
         </div>
       </div>

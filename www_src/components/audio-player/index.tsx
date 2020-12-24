@@ -17,12 +17,13 @@ import prevIcon from '~/img/backward-icon.svg';
 import nextIcon from '~/img/forward-icon.svg';
 import shuffleIcon from '~/img/shuffle-icon.svg';
 import repeatIcon from '~/img/repeat-icon.svg';
+import cloudStreamIcon from '~/img/cloud-stream-icon.svg';
+import directStreamIcon from '~/img/direct-stream-icon.svg';
 
 export const AudioPlayer = () => {
   const {state, dispatch} = React.useContext(MediaPlayerContext);
 
   const playerRef = React.useRef<HTMLAudioElement>();
-  const directStreamRef = React.useRef<HTMLInputElement>();
   const currentSongRef = React.useRef<any>();
   const [loading, setLoading] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
@@ -72,9 +73,10 @@ export const AudioPlayer = () => {
   };
 
   const onDirectStreamChangedHandler = () => {
+    const current = state.directStream || false;
     dispatch({
       type: 'TOGGLE_DIRECT_STREAM',
-      value: directStreamRef.current?.checked || false
+      value: !current
     })
   };
 
@@ -168,7 +170,7 @@ export const AudioPlayer = () => {
           }
 
           let songUrl = `/api/stream?id=${song.id}`;
-          if (directStreamRef.current.checked) {
+          if (state.directStream) {
             songUrl = await API.getUrl(song.id);
           }
 
@@ -200,9 +202,9 @@ export const AudioPlayer = () => {
   }, [state.volume]);
 
   return (
-    <div className="flex flex-row items-center flex-1 p-3 bg-gray-800 border-t border-gray-700">
+    <div className="flex flex-col md:flex-row items-center flex-1 p-3 bg-gray-800 border-t border-gray-700">
       {/* Left section */}
-      <div className="flex flex-row w-1/3">
+      <div className="hidden md:flex flex-row md:w-1/3">
         {currentSongRef.current && (
           <Fragment>
             <div
@@ -219,9 +221,9 @@ export const AudioPlayer = () => {
       </div>
 
       {/* Center section */}
-      <div className="flex-grow flex flex-col items-center">
+      <div className="w-full md:flex-1 md:flex-grow flex flex-col items-center">
         {/* Control buttons */}
-        <div className={"width-full flex flex-row items-center"}>
+        <div className={"w-full flex flex-row items-center justify-center"}>
           {loading ? (
             <div className="flex-1 mx-5 text-sm text-center">
               <div className="w-5 h-5 mx-auto text-white animate-spin">
@@ -232,7 +234,7 @@ export const AudioPlayer = () => {
             <Fragment>
               <button
             className={classnames(
-              'flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
+              'flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 focus:outline-none',
               {'text-green-500': state?.setting?.isRandom},
               {'text-white': !state?.setting?.isRandom}
             )}
@@ -241,26 +243,26 @@ export const AudioPlayer = () => {
             <SVG content={shuffleIcon} />
           </button>
               <button
-                className="flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
+                className="flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 focus:outline-none"
                 onClick={prevSongHandler}
               >
                 <SVG content={prevIcon} />
               </button>
               <button
-                className="flex items-center justify-center w-8 h-8 mx-2 text-white opacity-75 hover:opacity-100 border border-white rounded-full outline-none focus:outline-none"
+                className="flex items-center justify-center w-8 h-8 mx-2 text-white opacity-75 hover:opacity-100 border border-white rounded-full focus:outline-none"
                 onClick={playPauseToggle}
               >
                 <SVG content={playing ? pauseIcon : playIcon} />
               </button>
               <button
-                className="flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
+                className="flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 focus:outline-none"
                 onClick={nextSongHandler}
               >
                 <SVG content={nextIcon} />
               </button>
               <button
                 className={classnames(
-                  'flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
+                  'flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 focus:outline-none',
                   {'text-green-500': state?.setting?.isRepeating},
                   {'text-white': !state?.setting?.isRepeating}
                 )}
@@ -284,9 +286,9 @@ export const AudioPlayer = () => {
       </div>
 
       {/* Right section */}
-      <div className={"w-1/3 flex flex-row justify-end"}>
+      <div className={"md:w-1/3 flex flex-row justify-end"}>
         {/* Volume control */}
-        <div className={"hidden md:flex px-3 mx-3"}>
+        <div className={"px-3 mx-3 hidden md:flex"}>
           <VolumeControl
             volume={state.volume || 100}
             onVolumeChanged={volumeChangedHandler}
@@ -294,17 +296,14 @@ export const AudioPlayer = () => {
         </div>
 
         {/* Direct stream option */}
-        <div className="px-3 text-gray-500">
-          <input
-            type="checkbox"
-            name="direct-stream"
-            id="direct-stream"
-            className="mr-2"
-            ref={directStreamRef}
-            checked={state.directStream || false}
-            onChange={onDirectStreamChangedHandler}
-          />
-          <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">Direct Stream</label>
+        <div className="px-3 text-gray-500 mt-3 md:m-0 flex flex-row">
+          <button
+            className={"text-white opacity-75 hover:opacity-100 w-6 h-6 flex justify-center items-center focus:outline-none"}
+            title={state.directStream ? `Direct streaming from Youtube server` : `Stream through Xaudio server`}
+            onClick={onDirectStreamChangedHandler}
+          >
+            <SVG content={state.directStream ? directStreamIcon : cloudStreamIcon} />
+          </button>
         </div>
       </div>
     </div>

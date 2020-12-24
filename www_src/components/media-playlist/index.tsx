@@ -36,11 +36,11 @@ export const MediaPlaylist = () => {
   return (
     <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{left: 10, right: -17}}>
       <div className={"p-5 my-5 text-white flex flex-row items-end"}>
-        <div className={"w-48 h-48 bg-white rounded-lg mr-5 flex flex-row flex-wrap overflow-hidden"}>
+        <div className={"w-24 h-24 md:w-48 md:h-48 bg-white rounded-lg mr-5 flex flex-row flex-wrap overflow-hidden"}>
           {albumCovers.map(id => (
             <div
               key={`album-cover-${id}`}
-              className={"w-24 h-24"}
+              className={"w-12 h-12 md:w-24 md:h-24"}
               style={{
                 backgroundImage: `url(https://img.youtube.com/vi/${id}/mqdefault.jpg)`,
                 backgroundSize: 'cover',
@@ -51,7 +51,7 @@ export const MediaPlaylist = () => {
         </div>
         <div>
           <div className={"uppercase text-sm"}>playlist</div>
-          <h1 className="text-7xl font-bold">Now Playing</h1>
+          <h1 className="text-3xl md:text-7xl font-bold">Now Playing</h1>
           <div className="text-sm opacity-50">{state.songs.length} songs</div>
         </div>
       </div>
@@ -68,7 +68,7 @@ export const MediaPlaylist = () => {
                 {'text-gray-300': !isCurrent}
               )}
             >
-              <div className="flex flex-row items-center p-2 col-span-6" onClick={() => playClickHandler(song.id)}>
+              <div className="flex flex-row items-start md:items-center p-2 col-span-8 md:col-span-6" onClick={() => playClickHandler(song.id)}>
                 <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">
                   {i + 1}
                 </div>
@@ -79,10 +79,10 @@ export const MediaPlaylist = () => {
                     backgroundSize: 'cover',
                     backgroundPosition: 'center center'
                   }} />
-                <div className="flex-1 hover:text-green-200">{song.title}</div>
+                <div className="flex-1 hover:text-green-200 text-sm md:text-base">{song.title}</div>
               </div>
-              <div className="p-2 col-span-2 opacity-60">{song.uploader}</div>
-              <div className="p-2 col-span-1"></div>
+              <div className="p-2 col-span-2 opacity-60 hidden md:block">{song.uploader}</div>
+              <div className="p-2 col-span-1"/>
               <div className="p-2 col-span-1">
                 <button
                   className={classnames(
