@@ -232,7 +232,7 @@ export const AudioPlayer = () => {
             <Fragment>
               <button
             className={classnames(
-              'flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
+              'flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
               {'text-green-500': state?.setting?.isRandom},
               {'text-white': !state?.setting?.isRandom}
             )}
@@ -260,7 +260,7 @@ export const AudioPlayer = () => {
               </button>
               <button
                 className={classnames(
-                  'flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
+                  'flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
                   {'text-green-500': state?.setting?.isRepeating},
                   {'text-white': !state?.setting?.isRepeating}
                 )}
