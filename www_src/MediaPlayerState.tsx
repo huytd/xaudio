@@ -96,6 +96,11 @@ export const MediaPlayerStateProvider = ({children}) => {
             currentSongId: state.songs[pidx].id
           }
         };
+      case 'TOGGLE_DIRECT_STREAM':
+        return {
+          ...state,
+          directStream: action.value
+        };
       default:
         throw new Error();
     }

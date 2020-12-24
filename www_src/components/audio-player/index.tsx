@@ -73,6 +73,13 @@ export const AudioPlayer = () => {
     }
   };
 
+  const onDirectStreamChangedHandler = () => {
+    dispatch({
+      type: 'TOGGLE_DIRECT_STREAM',
+      value: directStreamRef.current?.checked || false
+    })
+  };
+
   React.useEffect(() => {
     playerRef.current = new Audio();
 
@@ -243,11 +250,18 @@ export const AudioPlayer = () => {
       {/* Right section */}
       <div className={"w-1/3 flex flex-row justify-end"}>
         <div className="px-3 text-gray-500">
-          <input type="checkbox" name="direct-stream" className="mr-2" ref={directStreamRef} />
+          <input
+            type="checkbox"
+            name="direct-stream"
+            id="direct-stream"
+            className="mr-2"
+            ref={directStreamRef}
+            checked={state.directStream || false}
+            onChange={onDirectStreamChangedHandler}
+          />
           <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">Direct Stream</label>
         </div>
       </div>
     </div>
   );
 };
-
