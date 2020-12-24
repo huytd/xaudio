@@ -9,6 +9,7 @@ import spinnerIcon from '~/img/spinner.svg';
 import searchIcon from '~/img/search.svg';
 import plusIcon from '~/img/plus.svg';
 import checkIcon from '~/img/check.svg';
+import closeIcon from '~/img/delete.svg';
 
 export const SearchEntries = ({ items }) => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
@@ -74,7 +75,7 @@ export const SearchEntries = ({ items }) => {
   });
 };
 
-export const SearchArea = () => {
+export const SearchArea = ({ toggleSearchHandler }) => {
   const searchInputRef = React.useRef<HTMLInputElement>();
   const [loading, setLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState([]);
@@ -92,7 +93,18 @@ export const SearchArea = () => {
   };
 
   return (
-    <div id="search-area" className="flex flex-col w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
+    <div id="search-area" className="flex flex-col w-full md:w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
+      <div className="px-3 py-2 border-b border-gray-700 text-white">
+        <div className="m-0 text-bold">Search</div>
+        <button
+          className={
+            'text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 p-2 outline-none'
+          }
+          onClick={toggleSearchHandler}
+        >
+          <SVG content={closeIcon} />
+        </button>
+      </div>
       <div className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full">
         <div className="flex-shrink-0 mr-3">
           <SVG content={searchIcon} />

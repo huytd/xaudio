@@ -32,18 +32,13 @@ const App = () => {
             >
               {!showSearch ? (
                 <Fragment>
-                  <SVG content={searchIcon} className={"mr-2"} />
+                  <SVG content={searchIcon} className={'mr-2'} />
                   Search
                 </Fragment>
-              ) : (
-                <Fragment>
-                  <SVG content={closeIcon} />
-                  Close
-                </Fragment>
-              )}
+              ) : null}
             </button>
           </div>
-          {showSearch && <SearchArea/>}
+          {showSearch && <SearchArea toggleSearchHandler={toggleSearchHandler} />}
         </div>
         <div className="h-22 flex">
           <AudioPlayer />
