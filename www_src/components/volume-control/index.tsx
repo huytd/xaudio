@@ -4,9 +4,9 @@ import { useEffect, useState, useRef } from 'react'
 import {SVG} from '~/components/svg';
 import {ProgressBar} from '~/components/progress-bar';
 
-import volumeLowIcon from '~/img/volume-1.svg';
-import volumeFullIcon from '~/img/volume-2.svg';
-import volumeMuteIcon from '~/img/volume-x.svg';
+import volumeLowIcon from '~/img/volume-low-icon.svg';
+import volumeFullIcon from '~/img/volume-full-icon.svg';
+import volumeMuteIcon from '~/img/volume-mute-icon.svg';
 import {execute} from "~/lib/utils";
 
 export const VolumeControl = ({ volume, onVolumeChanged = undefined }) => {
