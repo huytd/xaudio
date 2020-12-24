@@ -31,8 +31,30 @@ export const MediaPlaylist = () => {
     });
   };
 
+  const albumCovers = state.songs.slice(0, 4).map(song => song.id);
+
   return (
-    <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{right: -17}}>
+    <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{left: 10, right: -17}}>
+      <div className={"p-5 my-5 text-white flex flex-row items-end"}>
+        <div className={"w-48 h-48 bg-white rounded-lg mr-5 flex flex-row flex-wrap overflow-hidden"}>
+          {albumCovers.map(id => (
+            <div
+              key={`album-cover-${id}`}
+              className={"w-24 h-24"}
+              style={{
+                backgroundImage: `url(https://img.youtube.com/vi/${id}/mqdefault.jpg)`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center'
+              }}
+            />
+          ))}
+        </div>
+        <div>
+          <div className={"uppercase text-sm"}>playlist</div>
+          <h1 className="text-7xl font-bold">Now Playing</h1>
+          <div className="text-sm opacity-50">{state.songs.length} songs</div>
+        </div>
+      </div>
       <ReactSortable list={state.songs} setList={sortPlaylistHandler}>
         {state.songs.map((song, i) => {
           const isCurrent = state.player?.currentSongId === song.id;

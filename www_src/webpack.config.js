@@ -72,7 +72,7 @@ const config = {
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Tubemusic',
+      title: 'Xaudio.me',
       template: require('html-webpack-template'),
       mobile: true,
       appMountId: 'app',

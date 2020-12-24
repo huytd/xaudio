@@ -164,6 +164,7 @@ export const AudioPlayer = () => {
         const current = state.player.currentSongId;
         if (current !== '0') {
           setLoading(true);
+          // TODO: Make this independent from state.songs, so we can have PREVIEW_SONG feature
           const song = state.songs.find((song) => song.id === current);
           currentSongRef.current = song;
           document.title = song.title;
@@ -199,7 +200,7 @@ export const AudioPlayer = () => {
         {currentSongRef.current && (
           <Fragment>
             <div
-              className="flex-shrink-0 w-12 h-12 mr-3 bg-red-500"
+              className="flex-shrink-0 sm:hidden md:w-12 md:h-12 mr-3 bg-red-500"
               style={{
                 backgroundImage: `url(https://img.youtube.com/vi/${currentSongRef.current?.id}/mqdefault.jpg)`,
                 backgroundSize: 'cover',
@@ -212,10 +213,18 @@ export const AudioPlayer = () => {
       </div>
 
       {/* Center section */}
-      <div className="w-1/3 flex flex-col items-center">
+      <div className="flex-grow flex flex-col items-center">
         {/* Control buttons */}
-        <div className="width-full flex flex-row items-center">
-          <button
+        <div className={"width-full flex flex-row items-center"}>
+          {loading ? (
+            <div className="flex-1 mx-5 text-sm text-center">
+              <div className="w-5 h-5 mx-auto text-white animate-spin">
+                <SVG content={spinnerIcon} />
+              </div>
+            </div>
+          ) : (
+            <Fragment>
+              <button
             className={classnames(
               'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
               {'text-green-500': state?.setting?.isRandom},
@@ -225,48 +234,46 @@ export const AudioPlayer = () => {
           >
             <SVG content={shuffleIcon} />
           </button>
-          <button
-            className="flex items-center justify-center w-6 h-6 text-white focus:outline-none"
-            onClick={prevSongHandler}
-          >
-            <SVG content={prevIcon} />
-          </button>
-          <button
-            className="flex items-center justify-center w-8 h-8 mx-2 text-white border border-white rounded-full focus:outline-none"
-            onClick={playPauseToggle}
-          >
-            <SVG content={playing ? pauseIcon : playIcon} />
-          </button>
-          <button
-            className="flex items-center justify-center w-6 h-6 text-white focus:outline-none"
-            onClick={nextSongHandler}
-          >
-            <SVG content={nextIcon} />
-          </button>
-          <button
-            className={classnames(
-              'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
-              {'text-green-500': state?.setting?.isRepeating},
-              {'text-white': !state?.setting?.isRepeating}
-            )}
-            onClick={() => changeSettingHandler('isRepeating')}
-          >
-            <SVG content={repeatIcon} />
-          </button>
+              <button
+                className="flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
+                onClick={prevSongHandler}
+              >
+                <SVG content={prevIcon} />
+              </button>
+              <button
+                className="flex items-center justify-center w-8 h-8 mx-4 text-white opacity-75 hover:opacity-100 border border-white rounded-full outline-none focus:outline-none"
+                onClick={playPauseToggle}
+              >
+                <SVG content={playing ? pauseIcon : playIcon} />
+              </button>
+              <button
+                className="flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
+                onClick={nextSongHandler}
+              >
+                <SVG content={nextIcon} />
+              </button>
+              <button
+                className={classnames(
+                  'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
+                  {'text-green-500': state?.setting?.isRepeating},
+                  {'text-white': !state?.setting?.isRepeating}
+                )}
+                onClick={() => changeSettingHandler('isRepeating')}
+              >
+                <SVG content={repeatIcon} />
+              </button>
+            </Fragment>
+          )}
         </div>
         {/* Timeline */}
-        <div className="w-full flex-1 mt-2 flex-shrink-0 flex flex-row items-center">
-          <div className="px-3 font-mono text-sm text-center text-gray-500">{durationDisplay(duration.current)}</div>
-          {loading ? (
-            <div className="flex-1 mx-5 text-sm text-center">
-              <div className="w-5 h-5 mx-auto text-white animate-spin">
-                <SVG content={spinnerIcon} />
-              </div>
-            </div>
-          ) : (
-            <ProgressBar progress={songProgress} onClick={songProgressClickHandler} />
-          )}
-          <div className="px-3 font-mono text-sm text-center text-gray-500">{durationDisplay(duration.full)}</div>
+        <div className={"w-full flex-1 mt-2 flex-shrink-0 flex flex-row items-center justify-around"}>
+          <div className="px-3 font-mono text-sm text-center text-gray-500">
+            {durationDisplay(duration.current)}
+          </div>
+          <ProgressBar progress={songProgress} onClick={songProgressClickHandler} />
+          <div className="px-3 font-mono text-sm text-center text-gray-500">
+            {durationDisplay(duration.full)}
+          </div>
         </div>
       </div>
 

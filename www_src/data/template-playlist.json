@@ -1,16 +1,6 @@
 {
   "songs": [
     {
-      "id": "CulBRA4HFgk",
-      "title": "Đỉnh của đỉnh - Rhymastic, JustaTee, Wowy, Karik, Binz, Suboi lần đầu kết hợp | Theme Song RAP VIỆT",
-      "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
-    },
-    {
-      "id": "4ahl6J3zhWA",
-      "title": "Karik, G.Ducky, Ricky Star tạo một cuộc địa chấn bằng bản rap Ala Ela | RAP VIỆT [Live Stage]",
-      "uploader": "Vie Channel - HTV2 [ SIÊU TRÍ TUỆ Mùa 2 Official ]"
-    },
-    {
       "id": "tAGnKpE4NCI",
       "title": "Metallica: Nothing Else Matters (Official Music Video)",
       "uploader": "Metallica"
@@ -41,59 +31,14 @@
       "uploader": "Metallica"
     },
     {
-      "id": "KKc_RMln5UY",
-      "title": "Đen - Lối Nhỏ ft. Phương Anh Đào (M/V)",
-      "uploader": "Đen Vâu Official"
+      "title":"Bức Tường - Con Đường Không Tên (Official Music Video)",
+      "id":"hIL3jhz44vQ",
+      "uploader":"BAN NHẠC BỨC TƯỜNG"
     },
     {
-      "id": "ddaEtFOsFeM",
-      "title": "Đen ft. MIN - Bài Này Chill Phết (M/V)",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "5e7e_KZINA4",
-      "title": "Đen - Đưa Nhau Đi Trốn ft. Linh Cáo (Prod. by Suicidal illness) [M/V]",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "iQBYrTjtBOE",
-      "title": "Đen - Lộn Xộn ll",
-      "uploader": "Đen Vâu Official"
-    },
-    {
-      "id": "kAydgevIafg",
-      "title": "Lộn Xộn lyric- Đen",
-      "uploader": "cái gì cũng có"
-    },
-    {
-      "id": "Id76JABvGs4",
-      "title": "Nah - Bất Động (Featuring MAC, Lynk Lee, Binz and CleverStar)",
-      "uploader": "deadnah"
-    },
-    {
-      "id": "UEqxDuK7FrI",
-      "title": "Bụi Đường - JustaTee ft Mr A & Mr T",
-      "uploader": "VCLproduction"
-    },
-    {
-      "id": "Y9NpOCWcz8E",
-      "title": "[ VIDEO LYRICS ] Tuyết yêu thương - Young Uno",
-      "uploader": "Tuấn Vũ"
-    },
-    {
-      "id": "jgZkrA8E5do",
-      "title": "TOULIVER x BINZ - \"BIGCITYBOI\" (Official Music Video)",
-      "uploader": "Binz Da Poet"
-    },
-    {
-      "id": "XdK-PdEdkaU",
-      "title": "[Official MV] Xin Anh Đừng - Emily ft. Lil' Knight & JustaTee",
-      "uploader": "JustaTeeMusic"
-    },
-    {
-      "id": "SFfBV-LBdC4",
-      "title": "NGỌN NẾN TRƯỚC GIÓ - EMILY ft LK,JUSTATEE,ANDREE",
-      "uploader": "BIGDADDY x EMILY"
+      "title":"CƠN MƯA THÁNG 5 - BỨC TƯỜNG - Lyric",
+      "id":"3J1hqqcAxrM",
+      "uploader":"Trí Thông Ngô"
     },
     {
       "id": "4RgCllKvJuc",
@@ -156,21 +101,6 @@
       "uploader": "quang nguyen"
     },
     {
-      "id": "QIfBYeQjTks",
-      "title": "CHA - MTV, Karik, Võ Trọng Phúc, Ngô Duy Khiêm, Nguyễn Quân, The Zoo [ MTVband ]",
-      "uploader": "MTV Band"
-    },
-    {
-      "id": "lYUYLqkNqDk",
-      "title": "Hydra - Người cha câm - Team Karik | RAP VIỆT [MV Lyrics]",
-      "uploader": "Vie Channel - HTV2 [ RAP VIỆT Official ]"
-    },
-    {
-      "id": "Mt8VnhbbIVc",
-      "title": "YC - Tượng (Official Audio)",
-      "uploader": "Rhymastic Official"
-    },
-    {
       "id": "R43xOUlRHWc",
       "title": "Tạ Quang Thắng - Vội Vàng (Official Music Video)",
       "uploader": "Tạ Quang Thắng"
@@ -194,31 +124,6 @@
       "id": "1nB13jFuc2s",
       "title": "Tạ Quang Thắng - Viết Tình Ca (Official Video)",
       "uploader": "Tạ Quang Thắng"
-    },
-    {
-      "id": "AdfSLq7XNoI",
-      "title": "MIN from ST.319 - TÌM (LOST) (ft. MR.A) M/V",
-      "uploader": "ST.319 Entertainment"
-    },
-    {
-      "id": "0R8IbpKXavM",
-      "title": "MIN - ‘TRÊN TÌNH BẠN DƯỚI TÌNH YÊU’ OFFICIAL MUSIC VIDEO",
-      "uploader": "MIN OFFICIAL"
-    },
-    {
-      "id": "qGb7H6aN32I",
-      "title": "MIN from ST.319 - Y.Ê.U (Acoustic Ver.) M/V",
-      "uploader": "ST.319 Entertainment"
-    },
-    {
-      "id": "EWz4fITO5qg",
-      "title": "MIN x ĐEN x JUSTATEE - VÌ YÊU CỨ ĐÂM ĐẦU (VYCĐĐ) | OFFICIAL MUSIC VIDEO (민)",
-      "uploader": "MIN OFFICIAL"
-    },
-    {
-      "id": "S7f24xceqSs",
-      "title": "MLEM MLEM | MIN X JUSTATEE X YUNO BIGBOI | OFFICIAL MUSIC VIDEO",
-      "uploader": "MIN OFFICIAL"
     }
   ],
   "player": {

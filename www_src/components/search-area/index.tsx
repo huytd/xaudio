@@ -9,14 +9,22 @@ import spinnerIcon from '~/img/spinner.svg';
 import searchIcon from '~/img/search.svg';
 import plusIcon from '~/img/plus.svg';
 import checkIcon from '~/img/check.svg';
+import closeIcon from '~/img/delete.svg';
 
 export const SearchEntries = ({ items }) => {
   const { state, dispatch } = React.useContext(MediaPlayerContext);
 
-  const entryClickHandler = ({ title, id, uploader }) => {
+  const addSongHandler = ({ title, id, uploader }) => {
     dispatch({
       type: 'ADD_SONG',
       value: { title, id, uploader, listenCount: 0 }
+    });
+  };
+
+  const previewSongHandler = ({ title, id, uploader }) => {
+    dispatch({
+      type: 'PREVIEW_SONG',
+      value: { title, id, uploader }
     });
   };
 
@@ -30,25 +38,36 @@ export const SearchEntries = ({ items }) => {
     return (
       <li
         key={i}
-        onClick={() => entryClickHandler(item)}
         className={classnames('group p-3 border-b border-gray-700 flex flex-row cursor-pointer hover:bg-gray-800', {
           'opacity-25 pointer-events-none': disabled
         })}
       >
         <div
+          onClick={() => addSongHandler(item)}
           className={classnames(
             'w-8 h-8 mr-2 flex items-center justify-center flex-shrink-0',
-            { 'text-white group-hover:text-green-500': !disabled },
+            { 'text-white hover:text-green-500': !disabled },
             { 'text-gray-600': disabled }
           )}
         >
           <SVG content={disabled ? checkIcon : plusIcon} />
         </div>
-        <div className="items-center flex-1">
+        <div
+          className="w-10 h-10 mr-2 bg-gray-900"
+          style={{
+            backgroundImage: `url(https://img.youtube.com/vi/${item.id}/mqdefault.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center'
+          }}
+        />
+        <div
+          className="items-center flex-1"
+          onClick={() => previewSongHandler(item)}
+        >
           <div className="font-medium text-white">{item.title}</div>
           <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
-            <div className="flex-1 font-medium text-right"></div>
+            <div className="flex-1 font-medium text-right"/>
           </div>
         </div>
       </li>
@@ -56,7 +75,7 @@ export const SearchEntries = ({ items }) => {
   });
 };
 
-export const SearchArea = () => {
+export const SearchArea = ({ toggleSearchHandler }) => {
   const searchInputRef = React.useRef<HTMLInputElement>();
   const [loading, setLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState([]);
@@ -74,7 +93,18 @@ export const SearchArea = () => {
   };
 
   return (
-    <div id="search-area" className="flex flex-col w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
+    <div id="search-area" className="flex flex-col w-full sm:w-3/12 bg-gray-800 border-l border-gray-700 shadow-lg opacity-80">
+      <div className="px-3 py-2 border-b border-gray-700 text-white">
+        <div className="m-0 text-bold">Search</div>
+        <button
+          className={
+            'text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 p-2 outline-none'
+          }
+          onClick={toggleSearchHandler}
+        >
+          <SVG content={closeIcon} />
+        </button>
+      </div>
       <div className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full">
         <div className="flex-shrink-0 mr-3">
           <SVG content={searchIcon} />
