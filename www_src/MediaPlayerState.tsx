@@ -17,6 +17,8 @@ interface MediaPlayerState {
     isRepeating?: boolean;
     isRandom?: boolean;
   };
+  volume?: number
+  directStream?: boolean
 }
 interface Action {
   type: string;
@@ -133,6 +135,16 @@ export const MediaPlayerStateProvider = ({ children }) => {
           }
         };
       }
+      case 'TOGGLE_DIRECT_STREAM':
+        return {
+          ...state,
+          directStream: action.value
+        };
+      case 'SET_VOLUME':
+        return {
+          ...state,
+          volume: action.value
+        };
       default:
         throw new Error();
     }

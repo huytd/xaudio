@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const config = {
@@ -75,11 +74,11 @@ const config = {
       title: 'Xaudio.me',
       template: require('html-webpack-template'),
       mobile: true,
+      favicon: './logo.png',
       appMountId: 'app',
       filename: 'index.html',
       headHtmlSnippet: `<link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">`
-    }),
-    new CleanWebpackPlugin()
+    })
   ],
   optimization: {
     runtimeChunk: 'single',

@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import {MediaPlayerContext} from '~/MediaPlayerState';
 import {SVG} from '~/components/svg';
 import {ProgressBar} from '~/components/progress-bar';
+import {VolumeControl} from "~/components/volume-control";
 
 import {durationDisplay} from '~/lib/utils';
 import {API} from '~/lib/api';
@@ -30,20 +31,6 @@ export const AudioPlayer = () => {
     current: 0,
     full: 0
   });
-
-  const volumeUpHandler = () => {
-    const player = playerRef?.current;
-    if (player.volume < 1) {
-      player.volume += 0.1;
-    }
-  };
-
-  const volumeDownHandler = () => {
-    const player = playerRef?.current;
-    if (player.volume > 0) {
-      player.volume -= 0.1;
-    }
-  };
 
   const nextSongHandler = () => {
     if (state?.setting?.isRandom) {
@@ -82,6 +69,13 @@ export const AudioPlayer = () => {
         setPlaying(true);
       }
     }
+  };
+
+  const onDirectStreamChangedHandler = () => {
+    dispatch({
+      type: 'TOGGLE_DIRECT_STREAM',
+      value: directStreamRef.current?.checked || false
+    })
   };
 
   React.useEffect(() => {
@@ -193,6 +187,18 @@ export const AudioPlayer = () => {
     }
   };
 
+  const volumeChangedHandler = (percent) => {
+    dispatch({
+      type: 'SET_VOLUME',
+      value: percent
+    })
+  };
+
+  React.useEffect(() => {
+    const player = playerRef?.current;
+    player.volume = (state.volume || 100) / 100;
+  }, [state.volume]);
+
   return (
     <div className="flex flex-row items-center flex-1 p-3 bg-gray-800 border-t border-gray-700">
       {/* Left section */}
@@ -226,7 +232,7 @@ export const AudioPlayer = () => {
             <Fragment>
               <button
             className={classnames(
-              'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
+              'flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
               {'text-green-500': state?.setting?.isRandom},
               {'text-white': !state?.setting?.isRandom}
             )}
@@ -235,26 +241,26 @@ export const AudioPlayer = () => {
             <SVG content={shuffleIcon} />
           </button>
               <button
-                className="flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
+                className="flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
                 onClick={prevSongHandler}
               >
                 <SVG content={prevIcon} />
               </button>
               <button
-                className="flex items-center justify-center w-8 h-8 mx-4 text-white opacity-75 hover:opacity-100 border border-white rounded-full outline-none focus:outline-none"
+                className="flex items-center justify-center w-8 h-8 mx-2 text-white opacity-75 hover:opacity-100 border border-white rounded-full outline-none focus:outline-none"
                 onClick={playPauseToggle}
               >
                 <SVG content={playing ? pauseIcon : playIcon} />
               </button>
               <button
-                className="flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
+                className="flex items-center justify-center w-6 h-6 mx-2 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none"
                 onClick={nextSongHandler}
               >
                 <SVG content={nextIcon} />
               </button>
               <button
                 className={classnames(
-                  'flex items-center justify-center w-6 h-6 text-white focus:outline-none',
+                  'flex items-center justify-center w-6 h-6 text-white opacity-75 hover:opacity-100 outline-none focus:outline-none',
                   {'text-green-500': state?.setting?.isRepeating},
                   {'text-white': !state?.setting?.isRepeating}
                 )}
@@ -278,12 +284,27 @@ export const AudioPlayer = () => {
       </div>
 
       {/* Right section */}
-      <div className="w-1/3 flex flex-row justify-end">
+      <div className={"w-1/3 flex flex-row justify-end"}>
+        {/* Volume control */}
+        <div className={"hidden md:flex px-3 mx-3"}>
+          <VolumeControl
+            volume={state.volume || 100}
+            onVolumeChanged={volumeChangedHandler}
+          />
+        </div>
+
+        {/* Direct stream option */}
         <div className="px-3 text-gray-500">
-          <input type="checkbox" name="direct-stream" className="mr-2" ref={directStreamRef} />
-          <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">
-            Direct Stream
-          </label>
+          <input
+            type="checkbox"
+            name="direct-stream"
+            id="direct-stream"
+            className="mr-2"
+            ref={directStreamRef}
+            checked={state.directStream || false}
+            onChange={onDirectStreamChangedHandler}
+          />
+          <label htmlFor="direct-stream" title="Select this option if you experienced slow connection issue">Direct Stream</label>
         </div>
       </div>
     </div>
