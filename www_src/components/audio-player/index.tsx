@@ -215,7 +215,7 @@ export const AudioPlayer = () => {
                 backgroundPosition: 'center center'
               }}
             />
-            <div className="self-center mr-2 text-sm text-white overflow-ellipsis">{currentSongRef.current?.title}</div>
+            <div className="self-center mr-2 text-sm text-white overflow-ellipsis" dangerouslySetInnerHTML={{__html: currentSongRef.current?.title}}></div>
           </Fragment>
         )}
       </div>

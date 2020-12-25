@@ -79,7 +79,7 @@ export const MediaPlaylist = () => {
                     backgroundSize: 'cover',
                     backgroundPosition: 'center center'
                   }} />
-                <div className="flex-1 hover:text-green-200 text-sm md:text-base">{song.title}</div>
+                <div className="flex-1 hover:text-green-200 text-sm md:text-base" dangerouslySetInnerHTML={{__html: song.title}}></div>
               </div>
               <div className="p-2 col-span-2 opacity-60 hidden md:block">{song.uploader}</div>
               <div className="p-2 col-span-1"/>

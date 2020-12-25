@@ -64,7 +64,7 @@ export const SearchEntries = ({ items }) => {
           className="items-center flex-1"
           onClick={() => previewSongHandler(item)}
         >
-          <div className="text-sm md:text-base text-white pr-2 md:p-0">{item.title}</div>
+          <div className="text-sm md:text-base text-white pr-2 md:p-0" dangerouslySetInnerHTML={{__html: item.title}}></div>
           <div className="flex flex-row text-sm text-gray-500">
             <div className="flex-1 text-left">{item.uploader}</div>
             <div className="flex-1 font-medium text-right"/>
