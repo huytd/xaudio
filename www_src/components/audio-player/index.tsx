@@ -91,7 +91,7 @@ export const AudioPlayer = () => {
       const currentSong = currentSongRef.current;
       if (currentSong) {
         // @ts-ignore
-        navigator.mediaSession.metadata = new MediaMetadata({
+        navigator.mediaSession?.metadata = new MediaMetadata({
           title: currentSong.title,
           artist: currentSong.uploader,
           artwork: [
@@ -106,26 +106,26 @@ export const AudioPlayer = () => {
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('play', function () {
+    navigator.mediaSession?.setActionHandler('play', function () {
       const player = playerRef.current;
       player.play();
       setPlaying(true);
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('pause', function () {
+    navigator.mediaSession?.setActionHandler('pause', function () {
       const player = playerRef.current;
       player.pause();
       setPlaying(false);
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('previoustrack', function () {
+    navigator.mediaSession?.setActionHandler('previoustrack', function () {
       prevSongHandler();
     });
 
     // @ts-ignore
-    navigator.mediaSession.setActionHandler('nexttrack', function () {
+    navigator.mediaSession?.setActionHandler('nexttrack', function () {
       nextSongHandler();
     });
   }, []);
