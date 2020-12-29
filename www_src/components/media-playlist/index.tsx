@@ -2,7 +2,7 @@ import * as React from 'react';
 import classnames from 'classnames';
 import {ReactSortable} from 'react-sortablejs';
 
-import {MediaPlayerContext, SongState} from '~/MediaPlayerState';
+import {MediaPlayerContext, SongState} from '~/context';
 import {SVG} from '~/components/svg';
 
 import deleteIcon from '~/img/delete.svg';

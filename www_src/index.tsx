@@ -3,7 +3,7 @@ import * as React from 'react';
 import {Fragment} from 'react';
 import {render} from 'react-dom';
 
-import {MediaPlayerStateProvider} from './MediaPlayerState';
+import {MediaPlayerStateProvider} from './context';
 import {AudioPlayer} from './components/audio-player';
 import {MediaPlaylist} from './components/media-playlist';
 import {SearchArea} from './components/search-area';

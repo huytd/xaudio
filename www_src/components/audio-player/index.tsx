@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Fragment} from 'react';
 import classnames from 'classnames';
 
-import {MediaPlayerContext} from '~/MediaPlayerState';
+import {MediaPlayerContext} from '~/context';
 import {SVG} from '~/components/svg';
 import {ProgressBar} from '~/components/progress-bar';
 import {VolumeControl} from "~/components/volume-control";
