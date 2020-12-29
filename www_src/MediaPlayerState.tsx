@@ -11,7 +11,10 @@ export interface SongState {
 interface MediaPlayerState {
   songs: SongState[];
   player: {
-    currentSongId?: string;
+    currentSong?: {
+      id: string;
+      title: string;
+    } | undefined;
   };
   setting?: {
     isRepeating?: boolean;
@@ -60,7 +63,7 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             ...state.player,
-            currentSongId: action.value
+            currentSong: action.value
           }
         };
       case 'PREVIEW_SONG':
@@ -73,24 +76,24 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             ...state.player,
-            currentSongId: '0'
+            currentSong: undefined
           }
         };
       case 'RANDOM_SONG':
-        const getRandomSongId = (songId) => {
+        const getRandomSong = (song) => {
           const randomIndex = ~~(Math.random() * (state.songs.length - 1));
-          return state.songs[randomIndex].id !== songId ? state.songs[randomIndex].id : getRandomSongId(songId);
+          return state.songs[randomIndex].id !== song.id ? state.songs[randomIndex] : getRandomSong(song);
         };
-        const nextSongId = getRandomSongId(state.player.currentSongId);
+        const nextSong = getRandomSong(state.player.currentSong);
         return {
           ...state,
           player: {
             ...state.player,
-            currentSongId: nextSongId
+            currentSong: nextSong
           }
         };
       case 'NEXT_SONG':
-        let idx = state.songs.findIndex((song) => song.id === state.player.currentSongId);
+        let idx = state.songs.findIndex((song) => song.id === state.player?.currentSong?.id) || 0;
         if (idx + 1 <= state.songs.length - 1) {
           idx += 1;
         } else {
@@ -100,11 +103,11 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             ...state.player,
-            currentSongId: state.songs[idx].id
+            currentSong: state.songs[idx]
           }
         };
       case 'PREV_SONG':
-        let pidx = state.songs.findIndex((song) => song.id === state.player.currentSongId);
+        let pidx = state.songs.findIndex((song) => song.id === state.player?.currentSong?.id) || 0;
         if (pidx - 1 >= 0) {
           pidx -= 1;
         } else {
@@ -114,7 +117,7 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           player: {
             ...state.player,
-            currentSongId: state.songs[pidx].id
+            currentSong: state.songs[pidx]
           }
         };
       case 'REPEAT_SONG': {
@@ -155,7 +158,7 @@ export const MediaPlayerStateProvider = ({ children }) => {
     const stateToSave = {
       ...state,
       player: {
-        currentSongId: '0'
+        currentSong: undefined
       }
     };
     window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));

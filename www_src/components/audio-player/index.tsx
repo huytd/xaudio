@@ -157,11 +157,9 @@ export const AudioPlayer = () => {
   React.useEffect(() => {
     (async () => {
       if (state.player) {
-        const current = state.player.currentSongId;
-        if (current !== '0') {
+        const song = state.player.currentSong;
+        if (song !== undefined) {
           setLoading(true);
-          // TODO: Make this independent from state.songs, so we can have PREVIEW_SONG feature
-          const song = state.songs.find((song) => song.id === current);
           currentSongRef.current = song;
           document.title = song.title;
 

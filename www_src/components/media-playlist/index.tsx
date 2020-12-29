@@ -10,10 +10,10 @@ import deleteIcon from '~/img/delete.svg';
 export const MediaPlaylist = () => {
   const {state, dispatch} = React.useContext(MediaPlayerContext);
 
-  const playClickHandler = (id: string) => {
+  const playClickHandler = (song) => {
     dispatch({
       type: 'PLAY_SONG',
-      value: id
+      value: song
     });
   };
 
@@ -57,7 +57,7 @@ export const MediaPlaylist = () => {
       </div>
       <ReactSortable list={state.songs} setList={sortPlaylistHandler}>
         {state.songs.map((song, i) => {
-          const isCurrent = state.player?.currentSongId === song.id;
+          const isCurrent = state.player?.currentSong?.id === song.id;
           return (
             <div
               key={song.id}
@@ -68,7 +68,7 @@ export const MediaPlaylist = () => {
                 {'text-gray-300': !isCurrent}
               )}
             >
-              <div className="flex flex-row items-start md:items-center p-2 col-span-8 md:col-span-6" onClick={() => playClickHandler(song.id)}>
+              <div className="flex flex-row items-start md:items-center p-2 col-span-8 md:col-span-6" onClick={() => playClickHandler(song)}>
                 <div className="items-center justify-center flex-shrink-0 w-8 h-6 mr-2 text-center text-gray-700">
                   {i + 1}
                 </div>

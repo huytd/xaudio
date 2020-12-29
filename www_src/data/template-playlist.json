@@ -126,9 +126,7 @@
       "uploader": "Tạ Quang Thắng"
     }
   ],
-  "player": {
-    "currentSongId": "0"
-  },
+  "player": {},
   "setting": {
     "isRandom": false,
     "isRepeating": false
