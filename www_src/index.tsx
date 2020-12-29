@@ -10,7 +10,6 @@ import {SearchArea} from './components/search-area';
 import {SVG} from '~/components/svg';
 
 import searchIcon from '~/img/search.svg';
-import closeIcon from '~/img/delete.svg';
 
 const App = () => {
   const [showSearch, setShowSearch] = React.useState(false);

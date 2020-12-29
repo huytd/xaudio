@@ -23,7 +23,7 @@ export const SearchEntries = ({ items }) => {
 
   const previewSongHandler = ({ title, id, uploader }) => {
     dispatch({
-      type: 'PREVIEW_SONG',
+      type: 'PLAY_SONG',
       value: { title, id, uploader }
     });
   };

@@ -66,11 +66,6 @@ export const MediaPlayerStateProvider = ({ children }) => {
             currentSong: action.value
           }
         };
-      case 'PREVIEW_SONG':
-        // TODO: Nothing here yet, need to wait for Audio Player refactor
-        return {
-          ...state,
-        };
       case 'STOP_SONG':
         return {
           ...state,
