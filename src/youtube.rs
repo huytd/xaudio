@@ -122,3 +122,21 @@ pub fn get_songs_in_playlist(playlist_url: &str) -> Result<Playlist, String> {
     }
     return Err("Error parsing data".to_owned());
 }
+
+
+pub async fn similar_songs(id: &str) -> Result<Vec<SearchEntry>, String> {
+    let key = env::var("YOUTUBE_API_KEY").map_err(stringify_error)?;
+    let url = format!("https://youtube.googleapis.com/youtube/v3/search?part=snippet&order=relevance&type=video&key={}&maxResults=20&relatedToVideoId={}", key, id);
+    let response = reqwest::get(&url).await.map_err(stringify_error)?;
+    if let Ok(result) = response.json::<YoutubeSearchResult>().await {
+        let entries = result.items.into_iter().map(|item| {
+            SearchEntry {
+                title: item.snippet.title.to_owned(),
+                uploader: item.snippet.channel_title.to_owned(),
+                id: item.id.video_id.to_owned()
+            }
+        }).collect();
+        return Ok(entries);
+    }
+    Ok(vec![])
+}
