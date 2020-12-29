@@ -55,7 +55,7 @@ export const MediaPlaylist = () => {
           <div className="text-sm opacity-50">{state.songs.length} songs</div>
         </div>
       </div>
-      <ReactSortable list={state.songs} setList={sortPlaylistHandler}>
+      <ReactSortable delayOnTouchOnly delay={100} list={state.songs} setList={sortPlaylistHandler}>
         {state.songs.map((song, i) => {
           const isCurrent = state.player?.currentSong?.id === song.id;
           return (
