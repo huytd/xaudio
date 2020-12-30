@@ -17,6 +17,12 @@ async fn search(param: web::Query<SearchQuery>) -> impl Responder {
     web::Json(result)
 }
 
+#[get("/api/suggestion")]
+async fn suggestion(param: web::Query<SearchQuery>) -> impl Responder {
+    let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
+    web::Json(result)
+}
+
 #[derive(Deserialize)]
 struct PlayQuery {
     id: String
@@ -88,6 +94,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .service(search)
+            .service(suggestion)
             .service(stream)
             .service(play)
             .service(get_billboard)

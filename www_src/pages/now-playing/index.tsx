@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Fragment } from 'react';
 import { MediaPlaylist } from '../../components/media-playlist';
-import { SearchArea } from '../../components/search-area';
+import { DrawerArea } from '../../components/search-area';
 import { SVG } from '~/components/svg';
 import searchIcon from '~/img/search.svg';
 
 export const NowPlayingPage = () => {
-  const [showSearch, setShowSearch] = React.useState(false);
+  const [showDrawer, setShowDrawer] = React.useState(false);
 
-  const toggleSearchHandler = () => {
-    setShowSearch(!showSearch);
+  const toggleDrawerHandler = () => {
+    setShowDrawer(!showDrawer);
   };
 
   return (
@@ -17,17 +17,17 @@ export const NowPlayingPage = () => {
       {/* Playlist */}
       <div className="relative flex flex-row flex-1 pl-2 overflow-hidden">
         <MediaPlaylist />
-        {!showSearch ? (
+        {!showDrawer ? (
           <button
             className={"text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 m-5 focus:outline-none"}
-            onClick={toggleSearchHandler}
+            onClick={toggleDrawerHandler}
           >
             <SVG content={searchIcon} className={'mr-2'} />
             <span className={"hidden md:block"}>Explore</span>
           </button>
         ) : null}
       </div>
-      <SearchArea isOpen={showSearch} toggleSearchHandler={toggleSearchHandler} />
+      <DrawerArea isOpen={showDrawer} toggleDrawerHandler={toggleDrawerHandler} />
     </div>
   );
 };

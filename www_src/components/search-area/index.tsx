@@ -75,7 +75,7 @@ export const SearchEntries = ({ items }) => {
   });
 };
 
-export const SearchArea = ({ isOpen, toggleSearchHandler }) => {
+const SearchArea = () => {
   const searchInputRef = React.useRef<HTMLInputElement>();
   const [loading, setLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState([]);
@@ -93,6 +93,77 @@ export const SearchArea = ({ isOpen, toggleSearchHandler }) => {
   };
 
   return (
+    <React.Fragment>
+      <div className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full">
+        <div className="flex-shrink-0 mr-3">
+          <SVG content={searchIcon} />
+        </div>
+        <input
+          className="flex-1 text-white bg-gray-600 focus:outline-none"
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search by song title or artist..."
+          onKeyPress={keyPressHandler} />
+      </div>
+      {loading ? (
+        <div className="w-5 h-5 mx-auto my-5 text-white animate-spin">
+          <SVG content={spinnerIcon} />
+        </div>
+      ) : (
+        <div className="relative flex-1 overflow-hidden">
+          <ul className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
+            <SearchEntries items={searchResult} />
+          </ul>
+        </div>
+      )}
+    </React.Fragment>
+  );
+};
+
+const SuggestionArea = () => {
+  const { state } = React.useContext(MediaPlayerContext);
+  const [loading, setLoading] = React.useState(false);
+  const [searchResult, setSearchResult] = React.useState([]);
+
+  React.useEffect(() => {
+    (async () => {
+      const currentSong = state.player?.currentSong;
+      if (currentSong) {
+        setLoading(true);
+        const results = await API.getSimilarSongs(currentSong.id);
+        setLoading(false);
+        setSearchResult(results);
+      }
+    })();
+  }, [state.player?.currentSong]);
+
+  return (
+    <React.Fragment>
+      <div className="p-3 text-white">{state.player?.currentSong ? "You might also like" : "Play some music to get suggestion"}</div>
+      {loading ? (
+        <div className="w-5 h-5 mx-auto my-5 text-white animate-spin">
+          <SVG content={spinnerIcon} />
+        </div>
+      ) : (
+        <div className="relative flex-1 overflow-hidden">
+          <ul className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
+            <SearchEntries items={searchResult} />
+          </ul>
+        </div>
+      )}
+    </React.Fragment>
+  );
+};
+
+enum DRAWER_MODE {
+  SUGGESTION,
+  SEARCH
+};
+
+export const DrawerArea = ({ isOpen, toggleDrawerHandler }) => {
+  const [mode, setMode] = React.useState(DRAWER_MODE.SUGGESTION);
+
+  return (
     <div
       id="search-area"
       className={classnames(
@@ -103,44 +174,41 @@ export const SearchArea = ({ isOpen, toggleSearchHandler }) => {
     >
       {isOpen && (
         <React.Fragment>
+          {/* Close button */}
           <button
             className={
               'text-white opacity-50 hover:opacity-100 flex flex-row items-center absolute top-0 right-0 p-3 focus:outline-none'
             }
-            onClick={toggleSearchHandler}
+            onClick={toggleDrawerHandler}
           >
             <SVG content={closeIcon} />
           </button>
+
+          {/* Tab navigation */}
           <div className="text-white flex flex-row">
-            <div className="px-1 py-2 m-3 opacity-50 hover:opacity-100 cursor-pointer">
+            <button
+              className={classnames(
+                "px-1 py-2 m-3 opacity-50 hover:opacity-100 cursor-pointer focus:outline-none",
+                { "border-b-2 border-white opacity-100": mode === DRAWER_MODE.SUGGESTION }
+              )}
+              onClick={() => setMode(DRAWER_MODE.SUGGESTION)}
+            >
               Suggestion
-        </div>
-            <div className="px-1 py-2 m-3 border-b-2 border-white cursor-pointer">
+            </button>
+            <button
+              className={classnames(
+                "px-1 py-2 m-3 opacity-50 hover:opacity-100 cursor-pointer focus:outline-none",
+                { "border-b-2 border-white opacity-100": mode === DRAWER_MODE.SEARCH }
+              )}
+              onClick={() => setMode(DRAWER_MODE.SEARCH)}
+            >
               Search
-        </div>
+            </button>
           </div>
-          <div className="flex flex-row items-center flex-shrink-0 px-4 py-2 m-3 text-white bg-gray-600 rounded-full">
-            <div className="flex-shrink-0 mr-3">
-              <SVG content={searchIcon} />
-            </div>
-            <input
-              className="flex-1 text-white bg-gray-600 focus:outline-none"
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search by song title or artist..."
-              onKeyPress={keyPressHandler} />
-          </div>
-          {loading ? (
-            <div className="w-5 h-5 mx-auto my-5 text-white animate-spin">
-              <SVG content={spinnerIcon} />
-            </div>
-          ) : (
-              <div className="relative flex-1 overflow-hidden">
-                <ul className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{ right: -17 }}>
-                  <SearchEntries items={searchResult} />
-                </ul>
-              </div>
-            )}
+
+          {/* Drawer content */}
+          {mode === DRAWER_MODE.SEARCH && <SearchArea/>}
+          {mode === DRAWER_MODE.SUGGESTION && <SuggestionArea/>}
         </React.Fragment>
       )}
     </div>

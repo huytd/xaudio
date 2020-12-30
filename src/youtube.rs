@@ -27,7 +27,7 @@ pub struct PageInfo {
 #[serde(rename_all = "camelCase")]
 pub struct Item {
     pub id: Id,
-    pub snippet: Snippet,
+    pub snippet: Option<Snippet>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
@@ -72,10 +72,11 @@ pub async fn search_song(input: &str) -> Result<Vec<SearchEntry>, String> {
     let url = format!("https://youtube.googleapis.com/youtube/v3/search?part=snippet&order=relevance&q={}&type=video&key={}&maxResults=50", input, key);
     let response = reqwest::get(&url).await.map_err(stringify_error)?;
     if let Ok(result) = response.json::<YoutubeSearchResult>().await {
-        let entries = result.items.into_iter().map(|item| {
+        let entries = result.items.into_iter().filter(|item| item.snippet.is_some()).map(|item| {
+            let snippet = item.snippet.unwrap();
             SearchEntry {
-                title: item.snippet.title.to_owned(),
-                uploader: item.snippet.channel_title.to_owned(),
+                title: snippet.title.to_owned(),
+                uploader: snippet.channel_title.to_owned(),
                 id: item.id.video_id.to_owned()
             }
         }).collect();
@@ -126,13 +127,16 @@ pub fn get_songs_in_playlist(playlist_url: &str) -> Result<Playlist, String> {
 
 pub async fn similar_songs(id: &str) -> Result<Vec<SearchEntry>, String> {
     let key = env::var("YOUTUBE_API_KEY").map_err(stringify_error)?;
-    let url = format!("https://youtube.googleapis.com/youtube/v3/search?part=snippet&order=relevance&type=video&key={}&maxResults=20&relatedToVideoId={}", key, id);
+    let url = format!("https://youtube.googleapis.com/youtube/v3/search?part=snippet&order=relevance&type=video&key={}&maxResults=30&relatedToVideoId={}", key, id);
+    println!("API CALL {}", url);
     let response = reqwest::get(&url).await.map_err(stringify_error)?;
     if let Ok(result) = response.json::<YoutubeSearchResult>().await {
-        let entries = result.items.into_iter().map(|item| {
+        println!("GOT {} items", result.items.len());
+        let entries = result.items.into_iter().filter(|item| item.snippet.is_some()).map(|item| {
+            let snippet = item.snippet.unwrap();
             SearchEntry {
-                title: item.snippet.title.to_owned(),
-                uploader: item.snippet.channel_title.to_owned(),
+                title: snippet.title.to_owned(),
+                uploader: snippet.channel_title.to_owned(),
                 id: item.id.video_id.to_owned()
             }
         }).collect();
