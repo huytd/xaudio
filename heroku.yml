@@ -1,6 +1,6 @@
 setup:
   addons:
-    - plan: heroku-redis
+    - plan: heroku-redis:hobby-dev
       as: REDIS
 build:
   docker:

@@ -100,9 +100,8 @@ async fn test(redis: web::Data<Addr<RedisActor>>) -> impl Responder {
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let port = std::env::var("PORT").unwrap_or("3123".to_owned()).parse::<u16>().unwrap_or(3123);
-    let redis_port = std::env::var("REDIS_PORT").unwrap_or("6379".to_owned()).parse::<u16>().unwrap_or(6379);
-    let redis_path = format!("redis://0.0.0.0:{}", redis_port);
-    let redis_actor = RedisActor::new(redis_path).await;
+    let redis_url = std::env::var("REDIS_URL").unwrap_or("redis://0.0.0.0:6379".to_owned());
+    let redis_actor = RedisActor::new(redis_url).await;
     let addr = redis_actor.start();
 
     HttpServer::new(move || {

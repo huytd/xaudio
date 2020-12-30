@@ -14,7 +14,7 @@ RUN yarn build
 # Build Final
 FROM alpine:latest
 EXPOSE $PORT
-EXPOSE $REDIS_PORT
+EXPOSE $REDIS_URL
 EXPOSE $YOUTUBE_API_KEY
 RUN apk update \
     && apk add --no-cache ca-certificates bash curl python2
