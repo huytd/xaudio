@@ -94,9 +94,7 @@ pub fn get_song_url(id: &str) -> Result<String, String> {
     println!("DBG::FETCHING {}", url);
     let output = Command::new("youtube-dl")
     .arg("--get-url")
-    .arg("--extract-audio")
-    .arg("--audio-format=mp3")
-    .arg("--audio-quality=0")
+    .arg("-f bestaudio")
     .arg(url)
     .output().map_err(stringify_error)?;
     let stdout = String::from_utf8(output.stdout).map_err(stringify_error)?;

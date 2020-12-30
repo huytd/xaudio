@@ -6,3 +6,4 @@ yarn-error
 .DS_Store
 www
 .idea
+.vscode

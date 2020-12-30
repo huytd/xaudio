@@ -73,9 +73,9 @@ export const AudioPlayer = () => {
   };
 
   const onDirectStreamChangedHandler = () => {
-    const current = state.directStream || false;
+    const current = state.cloudStream || false;
     dispatch({
-      type: 'TOGGLE_DIRECT_STREAM',
+      type: 'TOGGLE_CLOUD_STREAM',
       value: !current
     })
   };
@@ -168,7 +168,7 @@ export const AudioPlayer = () => {
           }
 
           let songUrl = `/api/stream?id=${song.id}`;
-          if (state.directStream) {
+          if (!state.cloudStream) {
             songUrl = await API.getUrl(song.id);
           }
 
@@ -297,10 +297,10 @@ export const AudioPlayer = () => {
         <div className="px-3 text-gray-500 mt-3 md:m-0 flex flex-row">
           <button
             className={"text-white opacity-75 hover:opacity-100 w-6 h-6 flex justify-center items-center focus:outline-none"}
-            title={state.directStream ? `Direct streaming from Youtube server` : `Stream through Xaudio server`}
+            title={!state.cloudStream ? `Direct streaming from Youtube server` : `Stream through Xaudio server`}
             onClick={onDirectStreamChangedHandler}
           >
-            <SVG content={state.directStream ? directStreamIcon : cloudStreamIcon} />
+            <SVG content={!state.cloudStream ? directStreamIcon : cloudStreamIcon} />
           </button>
         </div>
       </div>
