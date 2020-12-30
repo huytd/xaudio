@@ -14,6 +14,8 @@ RUN yarn build
 # Build Final
 FROM alpine:latest
 EXPOSE $PORT
+EXPOSE $REDIS_PORT
+EXPOSE $YOUTUBE_API_KEY
 RUN apk update \
     && apk add --no-cache ca-certificates bash curl python2
 RUN curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl

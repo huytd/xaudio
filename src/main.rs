@@ -1,49 +1,14 @@
 mod youtube;
 mod billboard;
+mod redis_actor;
+
+use actix::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
 use actix_web::{App, HttpResponse, HttpServer, Responder, get, post, web};
 use actix_files::Files;
 use futures::StreamExt;
-
-use actix::prelude::*;
-use redis::{Client as RedisClient, aio::MultiplexedConnection};
-
-struct RedisActor {
-    conn: MultiplexedConnection,
-}
-
-impl RedisActor {
-    pub async fn new(redis_url: String) -> Self {
-        let client = RedisClient::open(redis_url).unwrap();
-        let (conn, call) = client.create_multiplexed_tokio_connection().await.unwrap();
-        actix_rt::spawn(call);
-        RedisActor { conn }
-    }
-}
-
-#[derive(Message, Debug)]
-#[rtype(result = "Result<Option<String>, redis::RedisError>")]
-struct InfoCommand;
-
-impl Handler<InfoCommand> for RedisActor {
-    type Result = ResponseFuture<Result<Option<String>, redis::RedisError>>;
-
-    fn handle(&mut self, _msg: InfoCommand, _: &mut Self::Context) -> Self::Result {
-        let mut con = self.conn.clone();
-        let cmd = redis::cmd("INFO");
-        let fut = async move {
-            cmd
-                .query_async(&mut con)
-                .await
-        };
-        Box::pin(fut)
-    }
-}
-
-impl Actor for RedisActor {
-    type Context = Context<Self>;
-}
+use redis_actor::{RedisActor, InfoCommand};
 
 #[derive(Deserialize)]
 struct SearchQuery {
