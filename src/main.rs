@@ -15,16 +15,50 @@ struct SearchQuery {
     query: String
 }
 
+async fn get_cached_data(redis: web::Data<Addr<RedisActor>>, action: &'static str, query: String) -> Option<String> {
+    if let Ok(result) = redis.send(RedisCommand(resp_array!["GET", format!("{}{}", action, query)])).await {
+        match result {
+            Ok(RespValue::BulkString(data)) => return Some(String::from_utf8(data).unwrap()),
+            _ => return None
+        }
+    }
+    None
+}
+
+fn write_cache_data(redis: web::Data<Addr<RedisActor>>, action: &'static str, query: String, data: String) {
+    redis.do_send(RedisCommand(resp_array!["SET", format!("{}{}", action, query), data, "EX", "86400"])); // cache for 1 day
+}
+
 #[get("/api/search")]
-async fn search(param: web::Query<SearchQuery>) -> impl Responder {
-    let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
-    web::Json(result)
+async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    if let Some(cached ) = get_cached_data(redis.clone(), "search", param.query.to_string()).await {
+        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
+            web::Json(parsed)
+        } else {
+            web::Json(json!({ "success": false }))
+        }
+    } else {
+        let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
+        let json_string = json!(result).to_string();
+        write_cache_data(redis.clone(), "search", param.query.to_string(), json_string);
+        web::Json(json!(result))
+    }
 }
 
 #[get("/api/suggestion")]
-async fn suggestion(param: web::Query<SearchQuery>) -> impl Responder {
-    let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
-    web::Json(result)
+async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    if let Some(cached ) = get_cached_data(redis.clone(), "suggestion", param.query.to_string()).await {
+        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
+            web::Json(parsed)
+        } else {
+            web::Json(json!({ "success": false }))
+        }
+    } else {
+        let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
+        let json_string = json!(result).to_string();
+        write_cache_data(redis.clone(), "search", param.query.to_string(), json_string);
+        web::Json(json!(result))
+    }
 }
 
 #[derive(Deserialize)]
