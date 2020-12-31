@@ -97,13 +97,18 @@ async fn test(redis: web::Data<Addr<RedisActor>>) -> Result<HttpResponse, Error>
     match result {
         Ok(RespValue::BulkString(value)) => Ok(HttpResponse::Ok().body(format!("{:?}", String::from_utf8(value)))),
         Err(error) => Ok(HttpResponse::Ok().body(format!("{:?}", error))),
-        _ => Ok(HttpResponse::Ok().body("unknown error"))
+        _ => Ok(HttpResponse::Ok().body("unhandled response type"))
     }
 }
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let port = std::env::var("PORT").unwrap_or("3123".to_owned()).parse::<u16>().unwrap_or(3123);
+
+    // The actix-redis crate based on redis-async, which does not have built-in
+    // support for connection string. So we have to manually parse it here. And
+    // also have to manually do authantication when the connection string has
+    // password inside. Hard coded to work with only Heroku's REDIS_URL.
 
     let mut redis_url = std::env::var("REDIS_URL").unwrap_or("127.0.0.1:6379".to_owned());
     let mut redis_pass = String::new();
