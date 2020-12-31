@@ -1,14 +1,14 @@
 mod youtube;
 mod billboard;
-mod redis_actor;
 
 use actix::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
-use actix_web::{App, HttpResponse, HttpServer, Responder, get, post, web};
+use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web};
 use actix_files::Files;
 use futures::StreamExt;
-use redis_actor::{RedisActor, InfoCommand};
+use actix_redis::{Command as RedisCommand, RedisActor};
+use redis_async::{resp_array, resp::RespValue};
 
 #[derive(Deserialize)]
 struct SearchQuery {
@@ -92,21 +92,36 @@ async fn get_billboard() -> impl Responder {
 }
 
 #[get("/api/test")]
-async fn test(redis: web::Data<Addr<RedisActor>>) -> impl Responder {
-    let res = redis.send(InfoCommand).await.unwrap().unwrap().unwrap();
-    HttpResponse::Ok().body(res)
+async fn test(redis: web::Data<Addr<RedisActor>>) -> Result<HttpResponse, Error> {
+    let result = redis.send(RedisCommand(resp_array!["INFO"])).await?;
+    match result {
+        Ok(RespValue::BulkString(value)) => Ok(HttpResponse::Ok().body(format!("{:?}", String::from_utf8(value)))),
+        Err(error) => Ok(HttpResponse::Ok().body(format!("{:?}", error))),
+        _ => Ok(HttpResponse::Ok().body("unknown error"))
+    }
 }
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let port = std::env::var("PORT").unwrap_or("3123".to_owned()).parse::<u16>().unwrap_or(3123);
-    let redis_url = std::env::var("REDIS_URL").unwrap_or("redis://0.0.0.0:6379".to_owned());
-    let redis_actor = RedisActor::new(redis_url).await;
-    let addr = redis_actor.start();
+
+    let mut redis_url = std::env::var("REDIS_URL").unwrap_or("127.0.0.1:6379".to_owned());
+    let mut redis_pass = String::new();
+    if redis_url.starts_with("redis://") {
+        let processed = redis_url.replace("redis://:", "");
+        let parts = processed.split('@').collect::<Vec<&str>>();
+        redis_pass = parts[0].to_owned();
+        redis_url = parts[1].to_owned();
+    }
 
     HttpServer::new(move || {
+        let redis_addr = RedisActor::start(redis_url.as_str());
+        if !redis_pass.is_empty() {
+            redis_addr.do_send(RedisCommand(resp_array!["AUTH", redis_pass.as_str()]));
+        }
+
         App::new()
-            .data(addr.clone())
+            .data(redis_addr)
             .service(search)
             .service(suggestion)
             .service(stream)
