@@ -19,3 +19,4 @@ csv = "1.1.3"
 actix-rt = "1.1.1"
 actix-redis = "0.9.1"
 redis-async = "0.6.3"
+tokio = { version = "0.2.6", features = [ "full" ] }

@@ -4,18 +4,98 @@ mod billboard;
 use actix::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
-use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web};
+use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web, HttpMessage, Either, HttpRequest};
 use actix_files::Files;
 use futures::StreamExt;
+use futures::future::{FutureExt, Ready, ok};
 use actix_redis::{Command as RedisCommand, RedisActor};
 use redis_async::{resp_array, resp::RespValue};
+use actix_web::dev::{Service, Transform, ServiceRequest, ServiceResponse};
+use std::rc::Rc;
+use std::pin::Pin;
+use std::task::{Context, Poll};
+use std::cell::RefCell;
+use reqwest::header::{HeaderName, HeaderValue};
+use actix_web::body::ResponseBody;
+
+const HAS_CACHE: &'static str = "has-cache";
+
+pub struct RedCache;
+pub struct RedCacheMiddleware<S> {
+    service: Rc<RefCell<S>>,
+}
+
+impl<S, B> Transform<S> for RedCache
+where
+    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+    S::Future: 'static,
+    B: 'static,
+{
+    type Request = ServiceRequest;
+    type Response = ServiceResponse<B>;
+    type Error = Error;
+    type InitError = ();
+    type Transform = RedCacheMiddleware<S>;
+    type Future = Ready<Result<Self::Transform, Self::InitError>>;
+
+    fn new_transform(&self, service: S) -> Self::Future {
+        ok(RedCacheMiddleware {
+            service: Rc::new(RefCell::new(service))
+        })
+    }
+}
+
+impl<S, B> Service for RedCacheMiddleware<S>
+    where
+        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+        S::Future: 'static,
+        B: 'static,
+{
+    type Request = ServiceRequest;
+    type Response = ServiceResponse<B>;
+    type Error = Error;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.service.poll_ready(cx)
+    }
+
+    fn call(&mut self, req: ServiceRequest) -> Self::Future {
+        let service = Rc::clone(&self.service);
+
+        async move {
+            let path = req.path().to_string();
+            let query = req.query_string().to_string();
+            let mut cached = String::new();
+            if let Some(redis) = req.app_data::<web::Data<Addr<RedisActor>>>() {
+                if let Some(data) = get_cached_data(redis.clone(), path, query).await {
+                    cached = data;
+                }
+            }
+            let mut req = req;
+            req.headers_mut().insert(HeaderName::from_static(HAS_CACHE), HeaderValue::from(cached.len()));
+            let fut = service.borrow_mut().call(req);
+            let mut res = fut.await?;
+            if cached.len() > 0 {
+                res = ServiceResponse::new(
+                    res.request().clone(),
+                    HttpResponse::Ok().body(cached).into_body()
+                );
+            } else {
+                let rez = res.response().body();
+            }
+            Ok(res)
+        }.boxed_local()
+    }
+}
+
 
 #[derive(Deserialize)]
 struct SearchQuery {
     query: String
 }
 
-async fn get_cached_data(redis: web::Data<Addr<RedisActor>>, action: &'static str, query: String) -> Option<String> {
+async fn get_cached_data(redis: web::Data<Addr<RedisActor>>, action: String, query: String) -> Option<String> {
     if let Ok(result) = redis.send(RedisCommand(resp_array!["GET", format!("{}{}", action, query)])).await {
         match result {
             Ok(RespValue::BulkString(data)) => return Some(String::from_utf8(data).unwrap()),
@@ -25,40 +105,28 @@ async fn get_cached_data(redis: web::Data<Addr<RedisActor>>, action: &'static st
     None
 }
 
-fn write_cache_data(redis: web::Data<Addr<RedisActor>>, action: &'static str, query: String, data: String) {
+fn write_cache_data(redis: web::Data<Addr<RedisActor>>, action: String, query: String, data: String) {
     redis.do_send(RedisCommand(resp_array!["SET", format!("{}{}", action, query), data, "EX", "86400"])); // cache for 1 day
 }
 
 #[get("/api/search")]
-async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
-    if let Some(cached ) = get_cached_data(redis.clone(), "search", param.query.to_string()).await {
-        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
-            web::Json(parsed)
-        } else {
-            web::Json(json!({ "success": false }))
-        }
-    } else {
+async fn search(req: HttpRequest, param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    let default = HeaderValue::from_static("0");
+    let has_cache = req.headers().get(HAS_CACHE).unwrap_or(&default);
+    if has_cache.eq("0") {
+        println!("CALLING YOUTUBE API");
         let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
-        let json_string = json!(result).to_string();
-        write_cache_data(redis.clone(), "search", param.query.to_string(), json_string);
-        web::Json(json!(result))
+        return web::Json(result);
+    } else {
+        println!("SKIP");
+        return web::Json(vec![]);
     }
 }
 
 #[get("/api/suggestion")]
 async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
-    if let Some(cached ) = get_cached_data(redis.clone(), "suggestion", param.query.to_string()).await {
-        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
-            web::Json(parsed)
-        } else {
-            web::Json(json!({ "success": false }))
-        }
-    } else {
-        let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
-        let json_string = json!(result).to_string();
-        write_cache_data(redis.clone(), "search", param.query.to_string(), json_string);
-        web::Json(json!(result))
-    }
+    let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
+    web::Json(result)
 }
 
 #[derive(Deserialize)]
@@ -161,6 +229,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .data(redis_addr)
+            .wrap(RedCache)
             .service(search)
             .service(suggestion)
             .service(stream)
