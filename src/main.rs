@@ -10,7 +10,7 @@ use futures::StreamExt;
 use futures::future::{FutureExt, Ready, ok};
 use actix_redis::{Command as RedisCommand, RedisActor};
 use redis_async::{resp_array, resp::RespValue};
-use actix_web::dev::{Service, Transform, ServiceRequest, ServiceResponse};
+use actix_web::dev::{Service, Transform, ServiceRequest, ServiceResponse, Body};
 use std::rc::Rc;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -77,12 +77,18 @@ impl<S, B> Service for RedCacheMiddleware<S>
             let fut = service.borrow_mut().call(req);
             let mut res = fut.await?;
             if cached.len() > 0 {
+                println!("FROM CACHED");
+                let parsed: serde_json::Value = serde_json::from_str(cached.as_str()).unwrap_or_default();
                 res = ServiceResponse::new(
                     res.request().clone(),
-                    HttpResponse::Ok().body(cached).into_body()
+                    HttpResponse::Ok().json(parsed).into_body()
                 );
             } else {
-                let rez = res.response().body();
+                println!("FROM NEW");
+                let bo = res.response().body();
+                // res = res.map_body(move |head, body| {
+                //     ResponseBody::from(body)
+                // });
             }
             Ok(res)
         }.boxed_local()
@@ -114,19 +120,28 @@ async fn search(req: HttpRequest, param: web::Query<SearchQuery>, redis: web::Da
     let default = HeaderValue::from_static("0");
     let has_cache = req.headers().get(HAS_CACHE).unwrap_or(&default);
     if has_cache.eq("0") {
-        println!("CALLING YOUTUBE API");
+        // No cache found, make a request and also write cache
         let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
+        write_cache_data(redis, req.path().to_string(), req.query_string().to_string(), json!(result).to_string());
         return web::Json(result);
     } else {
-        println!("SKIP");
+        // Do nothing, as the cache will take care of the response
         return web::Json(vec![]);
     }
 }
 
 #[get("/api/suggestion")]
-async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
-    let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
-    web::Json(result)
+async fn suggestion(req: HttpRequest, param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    let default = HeaderValue::from_static("0");
+    let has_cache = req.headers().get(HAS_CACHE).unwrap_or(&default);
+    if has_cache.eq("0") {
+        let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
+        write_cache_data(redis, req.path().to_string(), req.query_string().to_string(), json!(result).to_string());
+        return web::Json(result);
+    } else {
+        // Do nothing, as the cache will take care of the response
+        return web::Json(vec![]);
+    }
 }
 
 #[derive(Deserialize)]
