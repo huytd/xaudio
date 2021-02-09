@@ -3,12 +3,37 @@ import classnames from 'classnames';
 import {ReactSortable} from 'react-sortablejs';
 
 import {MediaPlayerContext, SongState} from '~/context';
+import {getPlaylistInUrl} from '~/lib/utils';
 import {SVG} from '~/components/svg';
+import {API} from '~/lib/api';
 
+import spinnerIcon from '~/img/spinner.svg';
 import deleteIcon from '~/img/delete.svg';
 
 export const MediaPlaylist = () => {
   const {state, dispatch} = React.useContext(MediaPlayerContext);
+  const [playlistLoading, setPlaylistLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    const preloadUrl = getPlaylistInUrl();
+    if (preloadUrl) {
+      (async () => {
+        setPlaylistLoading(true);
+        const result = await API.getPlaylist(preloadUrl);
+        if (result.length) {
+          setPlaylistLoading(false);
+          dispatch({
+            type: 'LOAD_PLAYLIST',
+            value: result.map((song) => ({
+              title: song.title,
+              id: song.id,
+              uploader: song.uploader
+            }))
+          });
+        }
+      })();
+    }
+  }, []);
 
   const playClickHandler = (song) => {
     dispatch({
@@ -33,7 +58,16 @@ export const MediaPlaylist = () => {
 
   const albumCovers = state.songs.slice(0, 4).map(song => song.id);
 
-  return (
+  return playlistLoading ? (
+    <div className="absolute top-0 bottom-0 left-0 right-0 overflow-hidden text-white">
+      <div className="m-5 flex justify-center items-center w-full h-full">
+        <div className="w-5 h-5 m-3 text-white animate-spin">
+          <SVG content={spinnerIcon} />
+        </div>
+        <div>Loading playlist...</div>
+      </div>
+    </div>
+  ) : (
     <div className="absolute top-0 bottom-0 left-0 right-0 overflow-y-scroll" style={{left: 10, right: -17}}>
       <div className={"p-5 my-5 text-white flex flex-row items-end"}>
         <div className={"w-24 h-24 md:w-48 md:h-48 bg-white rounded-lg mr-5 flex flex-row flex-wrap overflow-hidden"}>

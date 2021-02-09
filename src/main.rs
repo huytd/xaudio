@@ -109,6 +109,7 @@ async fn stream(param: web::Query<PlayQuery>) -> impl Responder {
 
 #[post("/api/import")]
 async fn import_from_url(param: web::Json<UrlQuery>) -> impl Responder {
+    println!("Importing {}", &param.url);
     let result = youtube::get_songs_in_playlist(&param.url);
     match result {
         Ok(playlist) => web::Json(json!(playlist)),

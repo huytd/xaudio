@@ -1,5 +1,6 @@
 import * as React from 'react';
 import templateState from '~/data/template-playlist.json';
+import { queryParams } from '~/lib/utils';
 
 export interface SongState {
   id: string;
@@ -33,8 +34,9 @@ type ContextProps = {
   dispatch: React.Dispatch<any>;
 };
 
+const readOnlyMode = queryParams("readOnly") || queryParams("playlist") || false;
 const savedState = window.localStorage.getItem('tubemusic-songs');
-const initialMediaPlayerState = savedState ? JSON.parse(savedState) : templateState;
+const initialMediaPlayerState = !readOnlyMode && savedState ? JSON.parse(savedState) : templateState;
 
 export const MediaPlayerContext = React.createContext<ContextProps>({
   state: initialMediaPlayerState,
@@ -43,6 +45,11 @@ export const MediaPlayerContext = React.createContext<ContextProps>({
 export const MediaPlayerStateProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer((state: MediaPlayerState, action: Action) => {
     switch (action.type) {
+      case 'LOAD_PLAYLIST':
+        return {
+          ...state,
+          songs: action.value
+        };
       case 'SORT_PLAYLIST':
         return {
           ...state,
@@ -156,7 +163,9 @@ export const MediaPlayerStateProvider = ({ children }) => {
         currentSong: undefined
       }
     };
-    window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
+    if (!readOnlyMode) {
+      window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
+    }
   }, [state]);
 
   return <MediaPlayerContext.Provider value={{ state, dispatch }}>{children}</MediaPlayerContext.Provider>;

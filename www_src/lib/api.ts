@@ -70,5 +70,9 @@ export const API = {
   getUrl: async (song) => {
     const result = await axios.get(`/api/play?id=${song}`);
     return result?.data?.url || `/api/stream?id=${song}`;
+  },
+  getPlaylist: async (url) => {
+    const result = await axios.post('/api/import', { url });
+    return result?.data?.entries || [];
   }
 };

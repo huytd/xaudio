@@ -56,8 +56,7 @@ pub struct Playlist {
 pub struct PlaylistEntry {
     pub id: String,
     pub title: String,
-    pub uploader: String,
-    pub extractor: String,
+    pub uploader: Option<String>
 }
 
 #[derive(Default, Debug, Clone, serde_derive::Serialize, serde_derive::Deserialize)]
@@ -107,18 +106,22 @@ pub fn get_song_url(id: &str) -> Result<String, String> {
 pub fn get_songs_in_playlist(playlist_url: &str) -> Result<Playlist, String> {
     let output = Command::new("youtube-dl")
     .arg("-J")
+    .arg("--flat-playlist")
     .arg(playlist_url)
     .output()
     .map_err(stringify_error)?;
     let stdout = String::from_utf8(output.stdout).map_err(stringify_error)?;
+    // Parse it as playlist
     if let Ok(parsed ) = serde_json::from_str::<Playlist>(&stdout).map_err(stringify_error) {
         return Ok(parsed);
     }
+    // Parse it as a single item
     if let Ok(parsed) = serde_json::from_str::<PlaylistEntry>(&stdout).map_err(stringify_error) {
         return Ok(Playlist {
             entries: vec![parsed]
         });
     }
+    println!("Could not parse the response data");
     return Err("Error parsing data".to_owned());
 }
 
