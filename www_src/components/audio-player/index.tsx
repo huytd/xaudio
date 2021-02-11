@@ -83,6 +83,15 @@ export const AudioPlayer = () => {
   React.useEffect(() => {
     playerRef.current = new Audio();
 
+    playerRef.current.addEventListener('ended', () => {
+      document.title = 'Tubemusic';
+      if (state?.setting?.isRepeating) {
+        repeatSongHandler();
+      } else {
+        nextSongHandler();
+      }
+    });
+
     playerRef.current.addEventListener('canplay', () => {
       setLoading(false);
       setPlaying(true);
@@ -139,14 +148,6 @@ export const AudioPlayer = () => {
         current: player.currentTime,
         full: player.duration
       });
-      if (percent === 100) {
-        document.title = 'Tubemusic';
-        if (state?.setting?.isRepeating) {
-          repeatSongHandler();
-        } else {
-          nextSongHandler();
-        }
-      }
     };
     playerRef.current.addEventListener('timeupdate', checkProgress);
     return () => {

@@ -88,6 +88,7 @@ export const MediaPlayerStateProvider = ({ children }) => {
           return state.songs[randomIndex].id !== song?.id ? state.songs[randomIndex] : getRandomSong(song);
         };
         const nextSong = getRandomSong(state.player.currentSong);
+        console.log("DBG::NEXT SONG", nextSong);
         return {
           ...state,
           player: {
