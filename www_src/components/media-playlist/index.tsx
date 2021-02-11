@@ -19,7 +19,13 @@ export const MediaPlaylist = () => {
     if (preloadUrl) {
       (async () => {
         setPlaylistLoading(true);
-        const result = await API.getPlaylist(preloadUrl);
+        const playlistPromises = preloadUrl.split(',').map(async (url) => {
+          return await API.getPlaylist(url);
+        });
+        const playlists = await Promise.all(playlistPromises);
+        const result = playlists
+          .reduce((ret, list) => ret.concat(list), [])
+          .reduce((ret, item) => ret.find(s => s.id === item.id) !== undefined ? ret : ret.concat(item), []);
         if (result.length) {
           setPlaylistLoading(false);
           dispatch({
@@ -56,6 +62,12 @@ export const MediaPlaylist = () => {
     });
   };
 
+  const forceSavePlaylist = () => {
+    dispatch({
+      type: 'FORCE_SAVE',
+    });
+  };
+
   const albumCovers = state.songs.slice(0, 4).map(song => song.id);
 
   return playlistLoading ? (
@@ -86,7 +98,14 @@ export const MediaPlaylist = () => {
         <div>
           <div className={"uppercase text-sm"}>playlist</div>
           <h1 className="text-3xl md:text-7xl font-bold">Now Playing</h1>
-          <div className="text-sm opacity-50">{state.songs.length} songs</div>
+          <div className="text-sm opacity-50">
+            <span>{state.songs.length} songs</span>
+            <span className="mx-3">|</span>
+            <button
+              className={"text-white opacity-75 hover:opacity-100 focus:outline-none"}
+              onClick={forceSavePlaylist}
+            >Save Playlist</button>
+          </div>
         </div>
       </div>
       <ReactSortable delayOnTouchOnly delay={100} list={state.songs} setList={sortPlaylistHandler}>

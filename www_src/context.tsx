@@ -22,7 +22,8 @@ interface MediaPlayerState {
     isRandom?: boolean;
   };
   volume?: number
-  cloudStream?: boolean
+  cloudStream?: boolean,
+  forceSave?: boolean
 }
 interface Action {
   type: string;
@@ -84,7 +85,7 @@ export const MediaPlayerStateProvider = ({ children }) => {
       case 'RANDOM_SONG':
         const getRandomSong = (song) => {
           const randomIndex = ~~(Math.random() * (state.songs.length - 1));
-          return state.songs[randomIndex].id !== song.id ? state.songs[randomIndex] : getRandomSong(song);
+          return state.songs[randomIndex].id !== song?.id ? state.songs[randomIndex] : getRandomSong(song);
         };
         const nextSong = getRandomSong(state.player.currentSong);
         return {
@@ -150,20 +151,26 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           volume: action.value
         };
+      case 'FORCE_SAVE':
+        return {
+          ...state,
+          forceSave: true
+        };
       default:
         throw new Error();
     }
   }, initialMediaPlayerState);
 
   React.useEffect(() => {
-    // Remove the current playing state from saved state
-    const stateToSave = {
-      ...state,
-      player: {
-        currentSong: undefined
-      }
-    };
-    if (!readOnlyMode) {
+    if (!readOnlyMode || state.forceSave) {
+      // Remove the current playing state from saved state
+      const stateToSave = {
+        ...state,
+        forceSave: undefined,
+        player: {
+          currentSong: undefined
+        }
+      };
       window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
     }
   }, [state]);
