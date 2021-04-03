@@ -1,4 +1,6 @@
-# Xaudio.me
+# Xaudio (Cross-platform Audio Player)
+
+![image](https://user-images.githubusercontent.com/613943/113493411-e94a5c00-9493-11eb-9821-bec4a65355bb.png)
 
 First, make sure you have `YOUTUBE_API_KEY` environment variable on your machine, please check this document to see [how to create one](https://developers.google.com/youtube/registering_an_application).
 
