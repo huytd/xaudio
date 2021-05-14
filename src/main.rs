@@ -35,7 +35,7 @@ struct SessionQuery {
 }
 
 #[get("/api/search")]
-async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>, redis_pass: web::Data<String>) -> impl Responder {
     if let Some(cached ) = read_from_redis(redis.clone(), format!("search{}", param.query.to_string())).await {
         if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
             web::Json(parsed)
@@ -46,14 +46,14 @@ async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor
         let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
         let json_string = json!(result).to_string();
         actix::spawn(async move {
-            write_to_redis(redis.clone(), format!("search{}", param.query.to_string()), json_string).await;
+            write_to_redis(redis.clone(), redis_pass, format!("search{}", param.query.to_string()), json_string).await;
         });
         web::Json(json!(result))
     }
 }
 
 #[get("/api/suggestion")]
-async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>, redis_pass: web::Data<String>) -> impl Responder {
     if let Some(cached ) = read_from_redis(redis.clone(), format!("suggestion{}", param.query.to_string())).await {
         if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
             web::Json(parsed)
@@ -64,7 +64,7 @@ async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisA
         let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
         let json_string = json!(result).to_string();
         actix::spawn(async move {
-            write_to_redis(redis.clone(), format!("suggestion{}", param.query.to_string()), json_string).await;
+            write_to_redis(redis.clone(), redis_pass, format!("suggestion{}", param.query.to_string()), json_string).await;
         });
         web::Json(json!(result))
     }
@@ -128,7 +128,7 @@ async fn read_session(param: web::Path<SessionQuery>, redis: web::Data<Addr<Redi
 }
 
 #[post("/api/session/{session_id}")]
-async fn write_session(param: web::Path<SessionQuery>, payload: web::Json<Playlist>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+async fn write_session(param: web::Path<SessionQuery>, payload: web::Json<Playlist>, redis: web::Data<Addr<RedisActor>>, redis_pass: web::Data<String>) -> impl Responder {
     let mut session_id = param.session_id.to_owned();
     if session_id.eq("new") {
         // Generate the new ID if session_id param is "new"
@@ -140,7 +140,7 @@ async fn write_session(param: web::Path<SessionQuery>, payload: web::Json<Playli
         }
     }
     let payload_str = json!(payload.clone()).to_string();
-    write_to_redis(redis, format!("session{}", session_id), payload_str).await;
+    write_to_redis(redis, redis_pass, format!("session{}", session_id), payload_str).await;
     web::Json(json!({
         "sessionId": session_id,
     }))
@@ -178,6 +178,7 @@ async fn main() -> std::io::Result<()> {
         }
 
         App::new()
+            .data(redis_pass.clone())
             .data(redis_addr)
             .service(search)
             .service(suggestion)
