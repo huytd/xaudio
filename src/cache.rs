@@ -14,7 +14,11 @@ pub async fn read_from_redis(redis: web::Data<Addr<RedisActor>>, key: String) ->
     None
 }
 
-pub fn write_to_redis(redis: web::Data<Addr<RedisActor>>, key: String, data: String) {
+pub async fn write_to_redis(redis: web::Data<Addr<RedisActor>>, key: String, data: String) {
     println!("DBG::WRITE REDIS {} {}", key, data);
-    redis.do_send(RedisCommand(resp_array!["SET", key, data, "EX", "86400"])); // cache for 1 day
+    let result = redis.send(RedisCommand(resp_array!["SET", key, data, "EX", "86400"])).await;
+    match result {
+        Ok(result) => println!("DBG::DATA SENT {:?}", result),
+        Err(err) => println!("DBG::REDIS SEND ERROR {:?}", err)
+    }
 }

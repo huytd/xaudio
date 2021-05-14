@@ -45,7 +45,9 @@ async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor
     } else {
         let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
         let json_string = json!(result).to_string();
-        write_to_redis(redis.clone(), format!("search{}", param.query.to_string()), json_string);
+        actix::spawn(async move {
+            write_to_redis(redis.clone(), format!("search{}", param.query.to_string()), json_string).await;
+        });
         web::Json(json!(result))
     }
 }
@@ -61,7 +63,9 @@ async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisA
     } else {
         let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
         let json_string = json!(result).to_string();
-        write_to_redis(redis.clone(), format!("suggestion{}", param.query.to_string()), json_string);
+        actix::spawn(async move {
+            write_to_redis(redis.clone(), format!("suggestion{}", param.query.to_string()), json_string).await;
+        });
         web::Json(json!(result))
     }
 }
@@ -136,7 +140,7 @@ async fn write_session(param: web::Path<SessionQuery>, payload: web::Json<Playli
         }
     }
     let payload_str = json!(payload.clone()).to_string();
-    write_to_redis(redis, format!("session{}", session_id), payload_str);
+    write_to_redis(redis, format!("session{}", session_id), payload_str).await;
     web::Json(json!({
         "sessionId": session_id,
     }))
@@ -158,6 +162,7 @@ async fn main() -> std::io::Result<()> {
         let parts = processed.split('@').collect::<Vec<&str>>();
         redis_pass = parts[0].to_owned();
         redis_url = parts[1].to_owned();
+        println!("DBG::REDIS CONNECT {} {}", redis_pass, redis_url);
     }
 
     HttpServer::new(move || {
