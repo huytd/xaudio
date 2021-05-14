@@ -16,7 +16,7 @@
     "copy-webpack-plugin": "^6.3.2",
     "css-loader": "^5.0.1",
     "file-loader": "^6.2.0",
-    "postcss": "^8.1.7",
+    "postcss": "^8.2.10",
     "postcss-loader": "^4.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
