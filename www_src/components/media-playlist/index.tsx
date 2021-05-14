@@ -60,13 +60,12 @@ export const MediaPlaylist = () => {
   };
 
   const sharePlaylist = async () => {
-    const sessionId = getPlaylistInUrl();
     const entries = state.songs.map(s => ({
       id: s.id,
       title: s.title,
       uploader: s.uploader || ""
     }));
-    const result = await API.savePlaylist(entries, sessionId);
+    const result = await API.savePlaylist(entries);
     const newSessionId = result?.data?.sessionId;
     if (newSessionId) {
       openUrl(`?playlist=${newSessionId}`);

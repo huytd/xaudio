@@ -75,10 +75,10 @@ export const API = {
     const result = await axios.get(`/api/session/${id}`);
     return result?.data?.entries || [];
   },
-  savePlaylist: async (entries, playlistId) => {
+  savePlaylist: async (entries) => {
     const payload = {
       entries: entries
     };
-    return await axios.post(`/api/session/${playlistId || "new"}`, payload);
+    return await axios.post(`/api/session/new`, payload);
   }
 };
