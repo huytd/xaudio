@@ -17,8 +17,6 @@ import prevIcon from '~/img/backward-icon.svg';
 import nextIcon from '~/img/forward-icon.svg';
 import shuffleIcon from '~/img/shuffle-icon.svg';
 import repeatIcon from '~/img/repeat-icon.svg';
-import cloudStreamIcon from '~/img/cloud-stream-icon.svg';
-import directStreamIcon from '~/img/direct-stream-icon.svg';
 
 export const AudioPlayer = () => {
   const {state, dispatch} = React.useContext(MediaPlayerContext);
@@ -70,14 +68,6 @@ export const AudioPlayer = () => {
         setPlaying(true);
       }
     }
-  };
-
-  const onDirectStreamChangedHandler = () => {
-    const current = state.cloudStream || false;
-    dispatch({
-      type: 'TOGGLE_CLOUD_STREAM',
-      value: !current
-    })
   };
 
   React.useEffect(() => {
@@ -169,9 +159,6 @@ export const AudioPlayer = () => {
           }
 
           let songUrl = `/api/stream?id=${song.id}`;
-          if (!state.cloudStream) {
-            songUrl = await API.getUrl(song.id);
-          }
 
           playerRef.current.src = songUrl;
           playerRef.current.load();
@@ -292,17 +279,6 @@ export const AudioPlayer = () => {
             volume={state.volume || 100}
             onVolumeChanged={volumeChangedHandler}
           />
-        </div>
-
-        {/* Direct stream option */}
-        <div className="px-3 text-gray-500 mt-3 md:m-0 flex flex-row">
-          <button
-            className={"text-white opacity-75 hover:opacity-100 w-6 h-6 flex justify-center items-center focus:outline-none"}
-            title={!state.cloudStream ? `Direct streaming from Youtube server` : `Stream through Xaudio server`}
-            onClick={onDirectStreamChangedHandler}
-          >
-            <SVG content={!state.cloudStream ? directStreamIcon : cloudStreamIcon} />
-          </button>
         </div>
       </div>
     </div>

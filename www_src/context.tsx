@@ -22,7 +22,6 @@ interface MediaPlayerState {
     isRandom?: boolean;
   };
   volume?: number
-  cloudStream?: boolean,
   errorMessage?: string
 }
 interface Action {
@@ -142,11 +141,6 @@ export const MediaPlayerStateProvider = ({ children }) => {
           }
         };
       }
-      case 'TOGGLE_CLOUD_STREAM':
-        return {
-          ...state,
-          cloudStream: action.value
-        };
       case 'SET_VOLUME':
         return {
           ...state,
