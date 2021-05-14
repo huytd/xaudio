@@ -114,7 +114,9 @@ async fn import_from_url(param: web::Json<UrlQuery>) -> impl Responder {
 #[get("/api/session/{session_id}")]
 async fn read_session(param: web::Path<SessionQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
     if let Some(cached ) = read_from_redis(redis.clone(), format!("session{}", param.session_id)).await {
+        println!("DBG::FOUND SESSION {}", param.session_id);
         if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
+            println!("DBG::PARSED SESSION {:?}", parsed);
             return web::Json(parsed);
         }
     }

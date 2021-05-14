@@ -19,12 +19,12 @@ export const MediaPlaylist = () => {
     if (sessionId) {
       (async () => {
         setPlaylistLoading(true);
-        const playlists = await API.getPlaylist(sessionId);
-        const result = playlists
+        const response = await API.getPlaylist(sessionId);
+        const result = response
           .reduce((ret, list) => ret.concat(list), [])
           .reduce((ret, item) => ret.find(s => s.id === item.id) !== undefined ? ret : ret.concat(item), []);
+        setPlaylistLoading(false);
         if (result.length) {
-          setPlaylistLoading(false);
           dispatch({
             type: 'LOAD_PLAYLIST',
             value: result.map((song) => ({
@@ -32,6 +32,11 @@ export const MediaPlaylist = () => {
               id: song.id,
               uploader: song.uploader
             }))
+          });
+        } else {
+          dispatch({
+            type: 'ERROR_MESSAGE',
+            value: 'Uh oh! Something went wrong. This playlist could not be loaded.'
           });
         }
       })();

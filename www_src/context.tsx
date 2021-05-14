@@ -23,7 +23,7 @@ interface MediaPlayerState {
   };
   volume?: number
   cloudStream?: boolean,
-  forceSave?: boolean
+  errorMessage?: string
 }
 interface Action {
   type: string;
@@ -152,10 +152,28 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           volume: action.value
         };
+      case 'ERROR_MESSAGE':
+        return {
+          ...state,
+          errorMessage: action.value
+        };
       default:
         throw new Error();
     }
   }, initialMediaPlayerState);
+
+  React.useEffect(() => {
+    if (!readOnlyMode) {
+      // Remove the current playing state from saved state
+      const stateToSave = {
+        ...state,
+        player: {
+          currentSong: undefined
+        }
+      };
+      window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
+    }
+  }, [state]);
 
   return <MediaPlayerContext.Provider value={{ state, dispatch }}>{children}</MediaPlayerContext.Provider>;
 };
