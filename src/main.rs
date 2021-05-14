@@ -1,64 +1,22 @@
 mod youtube;
-mod billboard;
+mod cache;
 
+use std::time::{SystemTime, UNIX_EPOCH};
 use actix::prelude::*;
+use actix_redis::{Command as RedisCommand, RedisActor};
+use cache::{read_from_redis, write_to_redis};
+use rand::Rng;
+use redis_async::{resp_array, resp::RespValue};
 use serde::Deserialize;
 use serde_json::json;
 use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web};
 use actix_files::Files;
 use futures::StreamExt;
-use actix_redis::{Command as RedisCommand, RedisActor};
-use redis_async::{resp_array, resp::RespValue};
+use youtube::Playlist;
 
 #[derive(Deserialize)]
 struct SearchQuery {
     query: String
-}
-
-async fn get_cached_data(redis: web::Data<Addr<RedisActor>>, action: &'static str, query: String) -> Option<String> {
-    if let Ok(result) = redis.send(RedisCommand(resp_array!["GET", format!("{}{}", action, query)])).await {
-        match result {
-            Ok(RespValue::BulkString(data)) => return Some(String::from_utf8(data).unwrap()),
-            _ => return None
-        }
-    }
-    None
-}
-
-fn write_cache_data(redis: web::Data<Addr<RedisActor>>, action: &'static str, query: String, data: String) {
-    redis.do_send(RedisCommand(resp_array!["SET", format!("{}{}", action, query), data, "EX", "86400"])); // cache for 1 day
-}
-
-#[get("/api/search")]
-async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
-    if let Some(cached ) = get_cached_data(redis.clone(), "search", param.query.to_string()).await {
-        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
-            web::Json(parsed)
-        } else {
-            web::Json(json!({ "success": false }))
-        }
-    } else {
-        let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
-        let json_string = json!(result).to_string();
-        write_cache_data(redis.clone(), "search", param.query.to_string(), json_string);
-        web::Json(json!(result))
-    }
-}
-
-#[get("/api/suggestion")]
-async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
-    if let Some(cached ) = get_cached_data(redis.clone(), "suggestion", param.query.to_string()).await {
-        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
-            web::Json(parsed)
-        } else {
-            web::Json(json!({ "success": false }))
-        }
-    } else {
-        let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
-        let json_string = json!(result).to_string();
-        write_cache_data(redis.clone(), "search", param.query.to_string(), json_string);
-        web::Json(json!(result))
-    }
 }
 
 #[derive(Deserialize)]
@@ -71,6 +29,42 @@ struct UrlQuery {
     url: String
 }
 
+#[derive(Deserialize)]
+struct SessionQuery {
+    session_id: String
+}
+
+#[get("/api/search")]
+async fn search(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    if let Some(cached ) = read_from_redis(redis.clone(), format!("search{}", param.query.to_string())).await {
+        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
+            web::Json(parsed)
+        } else {
+            web::Json(json!({ "success": false }))
+        }
+    } else {
+        let result = youtube::search_song(&param.query).await.unwrap_or(vec![]);
+        let json_string = json!(result).to_string();
+        write_to_redis(redis.clone(), format!("search{}", param.query.to_string()), json_string);
+        web::Json(json!(result))
+    }
+}
+
+#[get("/api/suggestion")]
+async fn suggestion(param: web::Query<SearchQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    if let Some(cached ) = read_from_redis(redis.clone(), format!("suggestion{}", param.query.to_string())).await {
+        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
+            web::Json(parsed)
+        } else {
+            web::Json(json!({ "success": false }))
+        }
+    } else {
+        let result = youtube::similar_songs(&param.query).await.unwrap_or(vec![]);
+        let json_string = json!(result).to_string();
+        write_to_redis(redis.clone(), format!("suggestion{}", param.query.to_string()), json_string);
+        web::Json(json!(result))
+    }
+}
 
 #[get("/api/play")]
 async fn play(param: web::Query<PlayQuery>) -> impl Responder {
@@ -117,23 +111,33 @@ async fn import_from_url(param: web::Json<UrlQuery>) -> impl Responder {
     }
 }
 
-#[get("/api/billboard")]
-async fn get_billboard() -> impl Responder {
-    let result = billboard::get_top_songs().await;
-    match result {
-        Ok(songs) => web::Json(json!({ "songs": songs })),
-        Err(_) => web::Json(json!({ "success": false }))
+#[get("/api/session/{session_id}")]
+async fn read_session(param: web::Path<SessionQuery>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    if let Some(cached ) = read_from_redis(redis.clone(), format!("session{}", param.session_id)).await {
+        if let Ok(parsed) = serde_json::from_str(cached.as_str()) {
+            return web::Json(parsed);
+        }
     }
+    web::Json(json!({ "success": false }))
 }
 
-#[get("/api/test")]
-async fn test(redis: web::Data<Addr<RedisActor>>) -> Result<HttpResponse, Error> {
-    let result = redis.send(RedisCommand(resp_array!["INFO"])).await?;
-    match result {
-        Ok(RespValue::BulkString(value)) => Ok(HttpResponse::Ok().body(format!("{:?}", String::from_utf8(value)))),
-        Err(error) => Ok(HttpResponse::Ok().body(format!("{:?}", error))),
-        _ => Ok(HttpResponse::Ok().body("unhandled response type"))
+#[post("/api/session/{session_id}")]
+async fn write_session(param: web::Path<SessionQuery>, payload: web::Json<Playlist>, redis: web::Data<Addr<RedisActor>>) -> impl Responder {
+    let mut session_id = param.session_id.to_owned();
+    if session_id.eq("new") {
+        // Generate the new ID if session_id param is "new"
+        let start = SystemTime::now();
+        if let Ok(epoch) = start.duration_since(UNIX_EPOCH) {
+            let now = epoch.as_millis() as u32;
+            let fuzz: u8 = rand::thread_rng().gen();
+            session_id = base64_url::encode(&format!("{}{}", fuzz, now));
+        }
     }
+    let payload_str = json!(payload.clone()).to_string();
+    write_to_redis(redis, format!("session{}", session_id), payload_str);
+    web::Json(json!({
+        "sessionId": session_id,
+    }))
 }
 
 #[actix_rt::main]
@@ -166,9 +170,9 @@ async fn main() -> std::io::Result<()> {
             .service(suggestion)
             .service(stream)
             .service(play)
-            .service(get_billboard)
             .service(import_from_url)
-            .service(test)
+            .service(read_session)
+            .service(write_session)
             .service(Files::new("/", "./www").index_file("index.html"))
     })
     .bind(("0.0.0.0", port))?

@@ -71,8 +71,14 @@ export const API = {
     const result = await axios.get(`/api/play?id=${song}`);
     return result?.data?.url || `/api/stream?id=${song}`;
   },
-  getPlaylist: async (url) => {
-    const result = await axios.post('/api/import', { url });
+  getPlaylist: async (id) => {
+    const result = await axios.get(`/api/session/${id}`);
     return result?.data?.entries || [];
+  },
+  savePlaylist: async (entries, playlistId) => {
+    const payload = {
+      entries: entries
+    };
+    return await axios.post(`/api/session/${playlistId || "new"}`, payload);
   }
 };
