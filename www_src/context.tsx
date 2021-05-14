@@ -152,29 +152,10 @@ export const MediaPlayerStateProvider = ({ children }) => {
           ...state,
           volume: action.value
         };
-      case 'FORCE_SAVE':
-        return {
-          ...state,
-          forceSave: true
-        };
       default:
         throw new Error();
     }
   }, initialMediaPlayerState);
-
-  React.useEffect(() => {
-    if (!readOnlyMode || state.forceSave) {
-      // Remove the current playing state from saved state
-      const stateToSave = {
-        ...state,
-        forceSave: undefined,
-        player: {
-          currentSong: undefined
-        }
-      };
-      window.localStorage.setItem('tubemusic-songs', JSON.stringify(stateToSave));
-    }
-  }, [state]);
 
   return <MediaPlayerContext.Provider value={{ state, dispatch }}>{children}</MediaPlayerContext.Provider>;
 };

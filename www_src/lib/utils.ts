@@ -37,3 +37,9 @@ export const getPlaylistInUrl = () => {
   const [_, rest] = currentUrl.split('?playlist=');
   return rest || null;
 };
+
+export const openUrl = (param) => {
+  const host = window.location.host;
+  const protocol = window.location.protocol;
+  window.location.href = `${protocol}//${host}/${param}`;
+}

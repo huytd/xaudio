@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import {ReactSortable} from 'react-sortablejs';
 
 import {MediaPlayerContext, SongState} from '~/context';
-import {getPlaylistInUrl} from '~/lib/utils';
+import {getPlaylistInUrl, openUrl} from '~/lib/utils';
 import {SVG} from '~/components/svg';
 import {API} from '~/lib/api';
 
@@ -15,14 +15,11 @@ export const MediaPlaylist = () => {
   const [playlistLoading, setPlaylistLoading] = React.useState(false);
 
   React.useEffect(() => {
-    const preloadUrl = getPlaylistInUrl();
-    if (preloadUrl) {
+    const sessionId = getPlaylistInUrl();
+    if (sessionId) {
       (async () => {
         setPlaylistLoading(true);
-        const playlistPromises = preloadUrl.split(',').map(async (url) => {
-          return await API.getPlaylist(url);
-        });
-        const playlists = await Promise.all(playlistPromises);
+        const playlists = await API.getPlaylist(sessionId);
         const result = playlists
           .reduce((ret, list) => ret.concat(list), [])
           .reduce((ret, item) => ret.find(s => s.id === item.id) !== undefined ? ret : ret.concat(item), []);
@@ -62,10 +59,19 @@ export const MediaPlaylist = () => {
     });
   };
 
-  const forceSavePlaylist = () => {
-    dispatch({
-      type: 'FORCE_SAVE',
-    });
+  const sharePlaylist = async () => {
+    const entries = state.songs.map(s => ({
+      id: s.id,
+      title: s.title,
+      uploader: s.uploader || ""
+    }));
+    const result = await API.savePlaylist(entries);
+    const newSessionId = result?.data?.sessionId;
+    if (newSessionId) {
+      openUrl(`?playlist=${newSessionId}`);
+    } else {
+      console.error("Could not save playlist");
+    }
   };
 
   const albumCovers = state.songs.slice(0, 4).map(song => song.id);
@@ -103,8 +109,8 @@ export const MediaPlaylist = () => {
             <span className="mx-3">|</span>
             <button
               className={"text-white opacity-75 hover:opacity-100 focus:outline-none"}
-              onClick={forceSavePlaylist}
-            >Save Playlist</button>
+              onClick={sharePlaylist}
+            >Share Playlist</button>
           </div>
         </div>
       </div>
