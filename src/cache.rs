@@ -3,12 +3,14 @@ use actix_redis::{Command as RedisCommand, RedisActor};
 use actix_web::web;
 use redis_async::{resp_array, resp::RespValue};
 
-pub async fn read_from_redis(redis: web::Data<Addr<RedisActor>>, key: String) -> Option<String> {
+pub async fn read_from_redis(redis: web::Data<Addr<RedisActor>>, redis_pass: web::Data<String>, key: String) -> Option<String> {
     println!("DBG::READ KEY {}", key);
-    if let Ok(result) = redis.send(RedisCommand(resp_array!["GET", key])).await {
-        match result {
-            Ok(RespValue::BulkString(data)) => return Some(String::from_utf8(data).unwrap()),
-            _ => return None
+    if let Ok(_auth_ret) = redis.send(RedisCommand(resp_array!["AUTH", redis_pass.as_str()])).await {
+        if let Ok(result) = redis.send(RedisCommand(resp_array!["GET", key])).await {
+            match result {
+                Ok(RespValue::BulkString(data)) => return Some(String::from_utf8(data).unwrap()),
+                _ => return None
+            }
         }
     }
     None
