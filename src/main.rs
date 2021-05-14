@@ -168,7 +168,13 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let redis_addr = RedisActor::start(redis_url.as_str());
         if !redis_pass.is_empty() {
-            redis_addr.do_send(RedisCommand(resp_array!["AUTH", redis_pass.as_str()]));
+            let auth_reddit_addr = redis_addr.clone();
+            let auth_pass = redis_pass.to_owned();
+            actix::spawn(async move {
+                if let Ok(auth) = auth_reddit_addr.send(RedisCommand(resp_array!["AUTH", auth_pass.as_str()])).await {
+                    println!("DBG::REDIS AUTH {:?}", auth);
+                }
+            });
         }
 
         App::new()
