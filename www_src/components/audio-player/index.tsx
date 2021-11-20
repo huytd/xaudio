@@ -159,7 +159,7 @@ export const AudioPlayer = () => {
           }
 
           // let songUrl = `/api/stream?id=${song.id}`;
-          let songUrl = API.getUrl(song.id);
+          let songUrl = await API.getUrl(song.id);
 
           playerRef.current.src = songUrl;
           playerRef.current.load();
