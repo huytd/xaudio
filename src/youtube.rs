@@ -92,6 +92,7 @@ pub fn get_song_url(id: &str) -> Result<String, String> {
     let url = format!("https://youtube.com/watch?v={}", id);
     println!("DBG::FETCHING {}", url);
     let output = Command::new("youtube-dl")
+    .arg("--force-ipv4")
     .arg("--get-url")
     .arg("-f bestaudio")
     .arg(url)
