@@ -158,7 +158,8 @@ export const AudioPlayer = () => {
             playerRef.current.pause();
           }
 
-          let songUrl = `/api/stream?id=${song.id}`;
+          // let songUrl = `/api/stream?id=${song.id}`;
+          let songUrl = API.getUrl(song.id);
 
           playerRef.current.src = songUrl;
           playerRef.current.load();
