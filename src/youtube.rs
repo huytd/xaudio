@@ -91,7 +91,7 @@ pub async fn get_song_stream(url: &str) -> Result<reqwest::Response, String> {
 pub fn get_song_url(id: &str) -> Result<String, String> {
     let url = format!("https://youtube.com/watch?v={}", id);
     println!("DBG::FETCHING {}", url);
-    let output = Command::new("yt-dlp")
+    let output = Command::new("yfetcher")
     .arg("--force-ipv4")
     .arg("--get-url")
     .arg("-f bestaudio")
@@ -105,7 +105,7 @@ pub fn get_song_url(id: &str) -> Result<String, String> {
 }
 
 pub fn get_songs_in_playlist(playlist_url: &str) -> Result<Playlist, String> {
-    let output = Command::new("yt-dlp")
+    let output = Command::new("yfetcher")
     .arg("-J")
     .arg("--flat-playlist")
     .arg(playlist_url)
