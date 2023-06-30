@@ -165,8 +165,9 @@ async fn main() -> std::io::Result<()> {
         let shared_redis_user = redis_user.clone();
         let shared_redis_password = redis_password.clone();
         actix::spawn(async move {
-            if let Ok(auth) = auth_reddit_addr.send(RedisCommand(resp_array!["AUTH", shared_redis_user.as_str(), shared_redis_password.as_str()])).await {
-                println!("DBG::REDIS AUTH {:?}", auth);
+            match auth_reddit_addr.send(RedisCommand(resp_array!["AUTH", shared_redis_user.as_str(), shared_redis_password.as_str()])).await {
+                Ok(auth) => println!("DBG::REDIS AUTH {:?}", auth),
+                Err(err) => println!("ERROR: {:?}", err)
             }
         });
         
@@ -175,7 +176,6 @@ async fn main() -> std::io::Result<()> {
             .data(redis_password.clone())
             .data(redis_user.clone())
             .data(redis_addr)
-            .service(search)
             .service(suggestion)
             .service(stream)
             .service(play)
