@@ -155,15 +155,17 @@ async fn main() -> std::io::Result<()> {
     // also have to manually do authantication when the connection string has
     // password inside. Hard coded to work with only Heroku's REDIS_URL.
 
-    let mut redis_url = std::env::var("REDIS_URL").unwrap_or("127.0.0.1:6379".to_owned());
+    let redis_url = std::env::var("REDIS_URL").unwrap_or("127.0.0.1:6379".to_owned());
     let redis_user = std::env::var("REDISUSER").expect("No REDISUSER set");
     let redis_password = std::env::var("REDISPASSWORD").expect("No REDISUSER set");
 
     HttpServer::new(move || {
         let redis_addr = RedisActor::start(redis_url.as_str());
         let auth_reddit_addr = redis_addr.clone();
+        let shared_redis_user = redis_user.clone();
+        let shared_redis_password = redis_password.clone();
         actix::spawn(async move {
-            if let Ok(auth) = auth_reddit_addr.send(RedisCommand(resp_array!["AUTH", redis_user.clone().as_str(), redis_password.clone().as_str()])).await {
+            if let Ok(auth) = auth_reddit_addr.send(RedisCommand(resp_array!["AUTH", shared_redis_user.as_str(), shared_redis_password.as_str()])).await {
                 println!("DBG::REDIS AUTH {:?}", auth);
             }
         });
