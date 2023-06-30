@@ -17,7 +17,7 @@ EXPOSE $PORT
 EXPOSE $REDIS_URL
 EXPOSE $YOUTUBE_API_KEY
 RUN apk update \
-    && apk add --no-cache ca-certificates bash curl python
+    && apk add --no-cache ca-certificates bash curl python3
 RUN curl -L https://github.com/huytd/cdn/raw/master/yfetcher -o /usr/local/bin/yfetcher
 RUN chmod a+rx /usr/local/bin/yfetcher
 COPY --from=backend /backend/target/x86_64-unknown-linux-musl/release/tubemusic .
